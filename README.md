@@ -21,7 +21,7 @@ manuais, minimizar erros no armazenamento de dados e facilitar a tomada de decis
 produtores rurais, contribuindo para uma gestão mais eficiente das propriedades agropecuárias.
 
 ## Motivação
-> O projeto em questão teve seu desenvolvimento motivado pela convivência de um dos desenvolvedores com o público-alvo da aplicação. Este já havia estruturado o escopo do software e, devido à oportunidade repentina, optou por colocá-lo em prática.
+> O projeto em questão teve seu desenvolvimento motivado pela convivência de um dos desenvolvedores com o público-alvo da aplicação. Esse já havia estruturado o escopo do software e, devido à oportunidade repentina, optou por colocá-lo em prática. Agregado a isso evidencia-se a melhora eminente da administração pecuária, possibilitada pelo sistema em questão, bem como a escassez do produtos semelhantes no mercado.
 
 ## Requisitos
 
