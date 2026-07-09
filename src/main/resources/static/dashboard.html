@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Agro Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">Agro Management</div>
+    <ul class="nav-list">
+        <li class="nav-item active"><a href="#"><span class="icon-dot"></span> Dashboard</a></li>
+        <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="user-profile">
+            <div class="status-badge"></div>
+            <div class="avatar"></div>
+        </div>
+    </header>
+
+    <section class="content-body">
+        <h1 class="page-title">Dashboard</h1>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="indicator-dot dot-green"></span> Total de Animais
+                </div>
+                <div class="metric-value">248</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="indicator-dot dot-green"></span> Vacinas em Dia
+                </div>
+                <div class="metric-value">189</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="indicator-dot dot-yellow"></span> Vacinas Pendentes
+                </div>
+                <div class="metric-value">42</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="indicator-dot dot-red"></span> Vacinas Atrasadas
+                </div>
+                <div class="metric-value">17</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

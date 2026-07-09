@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Funcionário - Agro Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">Agro Management System</div>
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="dashboard.html">
+                <span class="icon-dot"></span>
+                Animais
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="historico.html">
+                <span class="icon-dot"></span>
+                Histórico Sanitário
+            </a>
+        </li>
+        <li class="nav-item active">
+            <a href="cadastrar-usuario.html">
+                <span class="icon-dot"></span>
+                Novo Funcionário
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <div class="search-box">
+            <input type="text" placeholder="Pesquisar no sistema...">
+        </div>
+        <div class="user-profile">
+            <div class="avatar"></div>
+            <div class="status-badge"></div>
+        </div>
+    </header>
+
+    <section class="content-body">
+        <h1 class="page-title">Cadastrar Novo Funcionário</h1>
+
+        <div class="form-card">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Apenas gestores da propriedade possuem permissão para realizar o cadastro de novos colaboradores.
+            </p>
+
+            <form id="formCadastroFuncionario">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Nome Completo</label>
+                        <input type="text" id="name" class="form-control" placeholder="Ex: João da Silva" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">E-mail Corporativo</label>
+                        <input type="email" id="email" class="form-control" placeholder="funcionario@agro.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Senha Temporária</label>
+                        <input type="password" id="password" class="form-control" placeholder="•••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Cargo / Perfil de Acesso</label>
+                        <select id="role" class="form-control" required>
+                            <option value="OPERADOR">Operador (Funcionário do Rebanho)</option>
+                            <option value="GESTOR">Gestor (Administrador da Propriedade)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="window.history.back()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Cadastramento</button>
+                </div>
+            </form>
+
+            <div id="feedbackMessage" style="margin-top: 20px; font-weight: 600; font-size: 0.9rem;"></div>
+        </div>
+    </section>
+</main>
+
+<script>
+    document.getElementById('formCadastroFuncionario').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const token = localStorage.getItem('token');
+        const feedback = document.getElementById('feedbackMessage');
+
+        if (!token) {
+            feedback.style.color = '#dc2626';
+            feedback.innerText = '⚠️ Sessão inválida ou expirada. Por favor, faça login como Gestor novamente.';
+            return;
+        }
+
+        const payload = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                feedback.style.color = 'var(--primary)';
+                feedback.innerText = '✅ Funcionário cadastrado com sucesso!';
+                document.getElementById('formCadastroFuncionario').reset();
+            } else if (response.status === 403) {
+                feedback.style.color = '#dc2626';
+                feedback.innerText = '❌ Acesso Negado: Apenas GESTORES podem cadastrar novos funcionários.';
+            } else if (response.status === 400) {
+                feedback.style.color = '#dc2626';
+                feedback.innerText = '❌ Erro: O e-mail informado já está cadastrado no sistema.';
+            } else {
+                feedback.style.color = '#dc2626';
+                feedback.innerText = '❌ Não foi possível cadastrar o funcionário. Tente novamente.';
+            }
+        } catch (error) {
+            feedback.style.color = '#dc2626';
+            feedback.innerText = '❌ Erro de conexão com o servidor backend.';
+        }
+    });
+</script>
+</body>
+</html>

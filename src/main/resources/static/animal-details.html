@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Animal - Agro Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .animal-header-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .animal-avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e8f5e9;
+        }
+        .animal-header-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+        .animal-header-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .animal-meta-inline {
+            display: flex;
+            gap: 32px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .tab-nav {
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+        .tab-item {
+            padding: 12px 0;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.95rem;
+            position: relative;
+        }
+        .tab-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+        .detail-card-grid {
+            display: flex;
+            gap: 16px;
+        }
+        .detail-mini-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 160px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .detail-mini-card span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        .detail-mini-card strong {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">Agro Management</div>
+    <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
+        <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="user-profile">
+            <div class="status-badge"></div>
+            <div class="avatar"></div>
+        </div>
+    </header>
+
+    <section class="content-body">
+        <div class="animal-header-card">
+            <div class="animal-avatar-placeholder"></div>
+            <div class="animal-header-info">
+                <h2>Mimosa</h2>
+                <p>Brinco #0231</p>
+                <div class="animal-meta-inline">
+                    <span>Nelore</span>
+                    <span>Fêmea</span>
+                    <span>3 anos</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-nav">
+            <a href="#" class="tab-item active">Dados Gerais</a>
+            <a href="#" class="tab-item">Vacinação</a>
+            <a href="#" class="tab-item">Histórico</a>
+        </div>
+
+        <div class="detail-card-grid">
+            <div class="detail-mini-card">
+                <span>Nome</span>
+                <strong>Mimosa</strong>
+            </div>
+            <div class="detail-mini-card">
+                <span>Brinco</span>
+                <strong>#0231</strong>
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

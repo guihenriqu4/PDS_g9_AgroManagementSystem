@@ -28,13 +28,15 @@ public class SecurityConfigurations {
                 // Define que a API não guardará estado/sessão do usuário, focando 100% no token
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/", "/index.html", "/login.html", "/*.html", "/*.css", "/*.js", "/error").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers("/error").permitAll()
-                        
+
                         // Protege TODAS as ações de usuários (Registrar, Listar, Editar e Deletar)
                         .requestMatchers(HttpMethod.POST, "/register").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN") // Engloba GET, PUT e DELETE
-                        
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

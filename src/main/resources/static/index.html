@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Agro Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f5f7;
+        }
+        .login-card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .login-brand {
+            color: #2d7a3a;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+        .login-form .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .forgot-link {
+            display: block;
+            margin: 16px 0 24px;
+            color: #2d7a3a;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="login-brand">Agro Management System</div>
+    <h1 class="login-title">Bem-vindo de volta</h1>
+    <p class="login-subtitle">Acesse sua conta para continuar</p>
+
+    <form class="login-form" action="/login" method="POST">
+        <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" class="form-control" placeholder="•••••••••" required>
+        </div>
+
+        <a href="#" class="forgot-link">Esqueci minha senha</a>
+
+        <button type="submit" class="btn-primary btn-full">Entrar</button>
+    </form>
+</div>
+
+</body>
+</html>
