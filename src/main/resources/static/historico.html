@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico - Agro Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">Agro Management</div>
+    <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
+        <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
+        <li class="nav-item active"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+        <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="user-profile">
+            <div class="status-badge"></div>
+            <div class="avatar"></div>
+        </div>
+    </header>
+
+    <section class="content-body">
+        <h1 class="page-title">Histórico</h1>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Animal</th>
+                    <th>Ação</th>
+                    <th>Responsável</th>
+                </tr>
+                </thead>
+                <tbody id="history-tbody">
+                <tr>
+                    <td><strong>08/07/2026</strong></td>
+                    <td><strong>Mimosa</strong></td>
+                    <td>Vacina Aplicada - Febre Aftosa</td>
+                    <td>João Silva</td>
+                </tr>
+                <tr>
+                    <td><strong>07/07/2026</strong></td>
+                    <td><strong>Thor</strong></td>
+                    <td>Cadastro Atualizado</td>
+                    <td>Maria Santos</td>
+                </tr>
+                <tr>
+                    <td><strong>05/07/2026</strong></td>
+                    <td><strong>Jao</strong></td>
+                    <td>Peso Atualizado (480kg → 495kg)</td>
+                    <td>Carlos Souza</td>
+                </tr>
+                <tr>
+                    <td><strong>03/07/2026</strong></td>
+                    <td><strong>Amora</strong></td>
+                    <td>Vacina Aplicada - Leptospirose</td>
+                    <td>João Silva</td>
+                </tr>
+                <tr>
+                    <td><strong>01/07/2026</strong></td>
+                    <td><strong>Froid</strong></td>
+                    <td>Novo Animal Cadastrado</td>
+                    <td>Maria Santos</td>
+                </tr>
+                <tr>
+                    <td><strong>28/06/2026</strong></td>
+                    <td><strong>Raiva</strong></td>
+                    <td>Vacina Aplicada - Raiva</td>
+                    <td>Sabrina</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+
+        // Se não houver token, redireciona para a tela de login
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Recupera a role salva no localStorage
+        const userRole = localStorage.getItem('role');
+
+        // Garante a restrição no Frontend (Apenas GESTOR pode acessar)
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            alert('Acesso negado: Apenas gestores podem acessar esta página.');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        // Tenta buscar o histórico real do backend Java se disponível
+        try {
+            const response = await fetch('/historico/animal/1', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    const tbody = document.getElementById('history-tbody');
+                    tbody.innerHTML = data.map(item => `
+                        <tr>
+                            <td><strong>${item.applicationDate || ''}</strong></td>
+                            <td><strong>Animal #${item.id}</strong></td>
+                            <td>Vacina Aplicada - ${item.vaccineName || ''}</td>
+                            <td>${item.userName || 'Gestor'}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        } catch (e) {
+            console.log('Usando exibição padrão do layout.');
+        }
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>

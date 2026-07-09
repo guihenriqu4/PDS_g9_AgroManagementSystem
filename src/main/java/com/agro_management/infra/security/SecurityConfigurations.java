@@ -25,18 +25,20 @@ public class SecurityConfigurations {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
-                // Define que a API não guardará estado/sessão do usuário, focando 100% no token
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // Arquivos estáticos e páginas públicas
                         .requestMatchers("/", "/index.html", "/login.html", "/*.html", "/*.css", "/*.js", "/error").permitAll()
-
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers("/error").permitAll()
 
-                        // Protege TODAS as ações de usuários (Registrar, Listar, Editar e Deletar)
+                        // 1. ABA 1: Gestão/Cadastro de Usuários (Apenas GESTOR / ROLE_ADMIN)
                         .requestMatchers(HttpMethod.POST, "/register").hasRole("ADMIN")
-                        .requestMatchers("/users/**").hasRole("ADMIN") // Engloba GET, PUT e DELETE
+                        .requestMatchers("/users/**").hasRole("ADMIN")
 
+                        // 2. ABA 2: Histórico Sanitário e Aplicações (Apenas GESTOR / ROLE_ADMIN)
+                        .requestMatchers("/sanitary-history/**").hasRole("ADMIN")
+
+                        // Demais requisições exigem apenas autenticação (ex: ROLE_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

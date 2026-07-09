@@ -2,104 +2,313 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Funcionário - Agro Management System</title>
+    <title>Usuários - Agro Management System</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .btn-action-edit {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .btn-action-edit:hover { background-color: #2563eb; }
+
+        .btn-action-delete {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-action-delete:hover { background-color: #dc2626; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .badge-active { color: #16a34a; font-weight: 700; }
+        .badge-inactive { color: #dc2626; font-weight: 700; }
+    </style>
 </head>
 <body>
 
 <aside class="sidebar">
-    <div class="brand">Agro Management System</div>
+    <div class="brand">Agro Management</div>
     <ul class="nav-list">
-        <li class="nav-item">
-            <a href="dashboard.html">
-                <span class="icon-dot"></span>
-                Animais
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="historico.html">
-                <span class="icon-dot"></span>
-                Histórico Sanitário
-            </a>
-        </li>
-        <li class="nav-item active">
-            <a href="cadastrar-usuario.html">
-                <span class="icon-dot"></span>
-                Novo Funcionário
-            </a>
-        </li>
+        <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
+        <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
+        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+        <li class="nav-item active" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
 <main class="main-content">
     <header class="top-bar">
         <div class="search-box">
-            <input type="text" placeholder="Pesquisar no sistema...">
+            <input type="text" placeholder="Buscar...">
         </div>
         <div class="user-profile">
-            <div class="avatar"></div>
             <div class="status-badge"></div>
+            <div class="avatar"></div>
         </div>
     </header>
 
     <section class="content-body">
-        <h1 class="page-title">Cadastrar Novo Funcionário</h1>
+        <div class="header-actions">
+            <h1 class="page-title">Usuários</h1>
+            <button class="btn-primary" onclick="toggleForm()">+ Novo Usuário</button>
+        </div>
 
-        <div class="form-card">
-            <p style="color: var(--text-muted); font-size: 0.9rem;">
-                Apenas gestores da propriedade possuem permissão para realizar o cadastro de novos colaboradores.
-            </p>
-
-            <form id="formCadastroFuncionario">
+        <div id="form-card-container" class="form-card" style="display: none; margin-bottom: 24px;">
+            <h3 style="margin-bottom: 16px;">Cadastrar Novo Colaborador</h3>
+            <form id="user-form">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="name">Nome Completo</label>
-                        <input type="text" id="name" class="form-control" placeholder="Ex: João da Silva" required>
+                        <input type="text" id="name" class="form-control" placeholder="Ex: João Silva" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="email">E-mail Corporativo</label>
-                        <input type="email" id="email" class="form-control" placeholder="funcionario@agro.com" required>
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" class="form-control" placeholder="usuario@agro.com" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="password">Senha Temporária</label>
+                        <label for="password">Senha</label>
                         <input type="password" id="password" class="form-control" placeholder="•••••••••" required>
                     </div>
 
                     <div class="form-group">
                         <label for="role">Cargo / Perfil de Acesso</label>
                         <select id="role" class="form-control" required>
-                            <option value="OPERADOR">Operador (Funcionário do Rebanho)</option>
-                            <option value="GESTOR">Gestor (Administrador da Propriedade)</option>
+                            <option value="GESTOR">Administrador</option>
+                            <option value="VETERINARIO">Veterinário</option>
+                            <option value="OPERADOR">Funcionário</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="window.history.back()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Cadastramento</button>
+                    <button type="button" class="btn-secondary" onclick="toggleForm()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Cadastrar Usuário</button>
                 </div>
             </form>
+        </div>
 
-            <div id="feedbackMessage" style="margin-top: 20px; font-weight: 600; font-size: 0.9rem;"></div>
+        <div id="edit-modal" class="modal-overlay" style="display: none;">
+            <div class="form-card" style="width: 100%; max-width: 500px; margin: 20px;">
+                <h3 style="margin-bottom: 16px;">Editar Colaborador</h3>
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-id">
+
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="edit-name">Nome Completo</label>
+                        <input type="text" id="edit-name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="edit-email">E-mail</label>
+                        <input type="email" id="edit-email" class="form-control" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="edit-role">Cargo / Perfil de Acesso</label>
+                        <select id="edit-role" class="form-control" required>
+                            <option value="GESTOR">Administrador</option>
+                            <option value="VETERINARIO">Veterinário</option>
+                            <option value="OPERADOR">Funcionário</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="edit-status">Status do Usuário</label>
+                        <select id="edit-status" class="form-control" required>
+                            <option value="ATIVO">Ativo</option>
+                            <option value="INATIVO">Inativo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Cargo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="users-table-body">
+                </tbody>
+            </table>
         </div>
     </section>
 </main>
 
 <script>
-    document.getElementById('formCadastroFuncionario').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
+    document.addEventListener('DOMContentLoaded', async () => {
         const token = localStorage.getItem('token');
-        const feedback = document.getElementById('feedbackMessage');
+        const userRole = localStorage.getItem('role');
 
         if (!token) {
-            feedback.style.color = '#dc2626';
-            feedback.innerText = '⚠️ Sessão inválida ou expirada. Por favor, faça login como Gestor novamente.';
+            window.location.href = 'index.html';
             return;
         }
+
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            alert('Acesso negado: Apenas gestores podem visualizar e gerenciar usuários.');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        loadUsersFromBackend();
+    });
+
+    function toggleForm() {
+        const formContainer = document.getElementById('form-card-container');
+        formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function loadUsersFromBackend() {
+        const token = localStorage.getItem('token');
+        const tbody = document.getElementById('users-table-body');
+
+        try {
+            const response = await fetch('/users', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const users = await response.json();
+                if (users && users.length > 0) {
+                    tbody.innerHTML = users.map(user => {
+                        const isAtivo = (user.status || 'ATIVO') === 'ATIVO';
+                        const statusBadge = isAtivo ? '<span class="badge-active">Ativo</span>' : '<span class="badge-inactive">Inativo</span>';
+
+                        return `
+                            <tr>
+                                <td><strong>${escapeHtml(user.name)}</strong></td>
+                                <td>${escapeHtml(user.email)}</td>
+                                <td>${formatRoleName(user.role)}</td>
+                                <td>${statusBadge}</td>
+                                <td>
+                                    <button class="btn-action-edit" onclick="openEditModal(${user.id}, '${escapeHtml(user.name)}', '${escapeHtml(user.email)}', '${user.role}', '${user.status || 'ATIVO'}')">Editar</button>
+                                    <button class="btn-action-delete" onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')">Excluir</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum colaborador encontrado.</td></tr>';
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc2626;">Erro ao carregar usuários.</td></tr>';
+            }
+        } catch (e) {
+            console.error('Erro de requisição:', e);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Erro de conexão com o servidor.</td></tr>';
+        }
+    }
+
+    function formatRoleName(role) {
+        if (role === 'GESTOR' || role === 'ROLE_ADMIN') return 'Administrador';
+        if (role === 'VETERINARIO') return 'Veterinário';
+        return 'Funcionário';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+
+    // ----------------------------------------------------
+    // FUNÇÃO: Abrir / Fechar Modal de Edição
+    // ----------------------------------------------------
+    function openEditModal(id, name, email, role, status) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-email').value = email;
+        document.getElementById('edit-role').value = role === 'ROLE_ADMIN' ? 'GESTOR' : role;
+        document.getElementById('edit-status').value = status || 'ATIVO';
+        document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    // ----------------------------------------------------
+    // FUNÇÃO: Salvar Edição do Usuário (PUT /users/{id})
+    // ----------------------------------------------------
+    document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        const id = document.getElementById('edit-id').value;
+
+        const payload = {
+            name: document.getElementById('edit-name').value,
+            email: document.getElementById('edit-email').value,
+            role: document.getElementById('edit-role').value,
+            status: document.getElementById('edit-status').value
+        };
+
+        try {
+            const response = await fetch('/users/' + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('Colaborador atualizado com sucesso!');
+                closeEditModal();
+                loadUsersFromBackend();
+            } else if (response.status === 403) {
+                alert('Acesso negado: Apenas gestores podem editar colaboradores.');
+            } else {
+                alert('Erro ao atualizar informações do colaborador.');
+            }
+        } catch (error) {
+            alert('Erro de conexão com o servidor.');
+        }
+    });
+
+    // ----------------------------------------------------
+    // FUNÇÃO: Cadastrar Usuário (POST /register)
+    // ----------------------------------------------------
+    document.getElementById('user-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
 
         const payload = {
             name: document.getElementById('name').value,
@@ -119,24 +328,56 @@
             });
 
             if (response.ok) {
-                feedback.style.color = 'var(--primary)';
-                feedback.innerText = '✅ Funcionário cadastrado com sucesso!';
-                document.getElementById('formCadastroFuncionario').reset();
+                alert('Usuário cadastrado com sucesso!');
+                document.getElementById('user-form').reset();
+                toggleForm();
+                loadUsersFromBackend();
             } else if (response.status === 403) {
-                feedback.style.color = '#dc2626';
-                feedback.innerText = '❌ Acesso Negado: Apenas GESTORES podem cadastrar novos funcionários.';
-            } else if (response.status === 400) {
-                feedback.style.color = '#dc2626';
-                feedback.innerText = '❌ Erro: O e-mail informado já está cadastrado no sistema.';
+                alert('Acesso negado: Apenas gestores podem cadastrar usuários.');
             } else {
-                feedback.style.color = '#dc2626';
-                feedback.innerText = '❌ Não foi possível cadastrar o funcionário. Tente novamente.';
+                alert('Erro ao cadastrar usuário.');
             }
         } catch (error) {
-            feedback.style.color = '#dc2626';
-            feedback.innerText = '❌ Erro de conexão com o servidor backend.';
+            alert('Erro de conexão com o servidor.');
         }
     });
+
+    // ----------------------------------------------------
+    // FUNÇÃO: Excluir Usuário (DELETE /users/{id})
+    // ----------------------------------------------------
+    async function deleteUser(id, name) {
+        if (!confirm(`Tem certeza que deseja remover o colaborador "${name}"?`)) {
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('/users/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok || response.status === 204) {
+                alert('Colaborador removido com sucesso!');
+                loadUsersFromBackend();
+            } else if (response.status === 403) {
+                alert('Acesso negado: Apenas gestores podem remover colaboradores.');
+            } else {
+                alert('Não foi possível remover o colaborador.');
+            }
+        } catch (error) {
+            alert('Erro de conexão com o servidor.');
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
 </script>
+
 </body>
 </html>

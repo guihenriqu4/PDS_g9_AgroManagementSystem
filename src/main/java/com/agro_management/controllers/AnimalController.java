@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/animals")
@@ -38,5 +39,13 @@ public class AnimalController {
         }
         
         return ResponseEntity.ok(animal.get());
+    }
+
+    // Rota POST para cadastrar um novo animal
+    @PostMapping
+    public ResponseEntity<Animal> createAnimal(@RequestBody Animal animal) {
+        animal.setCreatedAt(LocalDateTime.now());
+        Animal savedAnimal = animalRepository.save(animal);
+        return ResponseEntity.ok(savedAnimal);
     }
 }

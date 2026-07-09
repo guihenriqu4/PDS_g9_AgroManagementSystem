@@ -25,6 +25,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("agro-management-api")
                     .withSubject(user.getUsername())
+                    .withClaim("role", user.getRole())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {

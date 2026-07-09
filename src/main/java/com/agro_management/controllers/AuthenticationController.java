@@ -34,10 +34,20 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO data) {
+        System.out.println(">>> [LOGIN TRY] Tentando logar com email: " + data.email());
+
+        var userInDb = userRepository.findByEmail(data.email());
+        if (userInDb == null) {
+            System.out.println(">>> [LOGIN ERROR] Usuário NÃO encontrado no banco pelo e-mail!");
+        } else {
+            System.out.println(">>> [LOGIN OK] Usuário encontrado: " + userInDb.getUsername());
+            System.out.println(">>> [LOGIN HASH] Hash da senha no banco: " + userInDb.getPassword());
+        }
+
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
         var token = tokenService.generateToken((User) auth.getPrincipal());
-        
+
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 

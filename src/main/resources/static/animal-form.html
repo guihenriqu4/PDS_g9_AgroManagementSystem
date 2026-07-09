@@ -13,10 +13,11 @@
         <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
         <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
@@ -36,21 +37,21 @@
         <p style="color: var(--text-muted); font-size: 0.9rem;">Preencha as informações do animal</p>
 
         <div class="form-card">
-            <form action="/animals" method="POST">
+            <form id="animal-form">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="earring">Brinco</label>
-                        <input type="text" id="earring" class="form-control" placeholder="Ex: 0123">
+                        <input type="text" id="earring" class="form-control" placeholder="Ex: #0123" required>
                     </div>
 
                     <div class="form-group">
                         <label for="name">Nome</label>
-                        <input type="text" id="name" class="form-control" placeholder="Nome do Animal">
+                        <input type="text" id="name" class="form-control" placeholder="Nome do Animal" required>
                     </div>
 
                     <div class="form-group">
                         <label for="sex">Sexo</label>
-                        <select id="sex" class="form-control">
+                        <select id="sex" class="form-control" required>
                             <option value="" disabled selected>Selecione...</option>
                             <option value="Macho">Macho</option>
                             <option value="Fêmea">Fêmea</option>
@@ -59,7 +60,7 @@
 
                     <div class="form-group">
                         <label for="race">Raça</label>
-                        <select id="race" class="form-control">
+                        <select id="race" class="form-control" required>
                             <option value="" disabled selected>Selecione...</option>
                             <option value="Nelore">Nelore</option>
                             <option value="Angus">Angus</option>
@@ -70,12 +71,12 @@
 
                     <div class="form-group">
                         <label for="weight">Peso (Kg)</label>
-                        <input type="number" step="0.1" id="weight" class="form-control" placeholder="Ex: 450">
+                        <input type="number" step="0.1" id="weight" class="form-control" placeholder="Ex: 450" required>
                     </div>
 
                     <div class="form-group">
                         <label for="bornIn">Data de Nascimento</label>
-                        <input type="text" id="bornIn" class="form-control" placeholder="dd/mm/aaaa">
+                        <input type="date" id="bornIn" class="form-control" required>
                     </div>
                 </div>
 
@@ -84,9 +85,75 @@
                     <button type="submit" class="btn-primary">Salvar Animal</button>
                 </div>
             </form>
+            <div id="feedback-msg" style="margin-top: 16px; font-weight: 600;"></div>
         </div>
     </section>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            const histTab = document.getElementById('nav-historico');
+            const userTab = document.getElementById('nav-usuarios');
+            if (histTab) histTab.style.display = 'none';
+            if (userTab) userTab.style.display = 'none';
+        }
+    });
+
+    document.getElementById('animal-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const token = localStorage.getItem('token');
+        const feedback = document.getElementById('feedback-msg');
+
+        const payload = {
+            earring: document.getElementById('earring').value,
+            name: document.getElementById('name').value,
+            sex: document.getElementById('sex').value,
+            race: document.getElementById('race').value,
+            weight: parseFloat(document.getElementById('weight').value),
+            bornIn: document.getElementById('bornIn').value
+        };
+
+        try {
+            const response = await fetch('/animals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('Animal cadastrado com sucesso!');
+                window.location.href = 'animals-list.html';
+            } else if (response.status === 403) {
+                feedback.style.color = '#dc2626';
+                feedback.innerText = '❌ Acesso negado. Sessão expirada ou sem permissão.';
+            } else {
+                feedback.style.color = '#dc2626';
+                feedback.innerText = '❌ Erro ao salvar animal. Verifique os dados.';
+            }
+        } catch (err) {
+            feedback.style.color = '#dc2626';
+            feedback.innerText = '❌ Erro de conexão com o servidor.';
+        }
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
 
 </body>
 </html>

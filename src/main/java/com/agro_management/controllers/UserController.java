@@ -34,15 +34,17 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(@PathVariable Long id, @RequestBody EditUserDTO data) {
         Optional<User> optionalUser = userRepository.findById(id);
-        
+
         if (optionalUser.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         User user = optionalUser.get();
         if (data.name() != null) user.setName(data.name());
+        if (data.email() != null) user.setEmail(data.email());
         if (data.role() != null) user.setRole(data.role());
-        
+        if (data.status() != null) user.setStatus(data.status());
+
         userRepository.save(user);
         return ResponseEntity.ok().build();
     }

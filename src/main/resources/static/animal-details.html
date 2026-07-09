@@ -12,29 +12,36 @@
             display: flex;
             align-items: center;
             gap: 24px;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         .animal-avatar-placeholder {
             width: 80px;
             height: 80px;
             border-radius: 50%;
             background-color: #e8f5e9;
+            flex-shrink: 0;
         }
         .animal-header-info h2 {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 4px;
+            color: var(--text-main);
         }
-        .animal-header-info p {
+        .animal-header-info .earring-tag {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 12px;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+            font-weight: 500;
         }
         .animal-meta-inline {
             display: flex;
-            gap: 32px;
+            gap: 40px;
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
+
+        /* NAVEGAÇÃO DE ABAS */
         .tab-nav {
             display: flex;
             gap: 24px;
@@ -48,6 +55,7 @@
             text-decoration: none;
             font-size: 0.95rem;
             position: relative;
+            cursor: pointer;
         }
         .tab-item.active {
             color: var(--primary);
@@ -62,15 +70,17 @@
             height: 2px;
             background-color: var(--primary);
         }
+
+        /* GRID DE MINI-CARDS CONFORME A IMAGEM */
         .detail-card-grid {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 160px);
             gap: 16px;
         }
         .detail-mini-card {
             background-color: white;
             border-radius: 8px;
-            padding: 20px;
-            width: 160px;
+            padding: 18px 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         .detail-mini-card span {
@@ -80,7 +90,9 @@
             margin-bottom: 8px;
         }
         .detail-mini-card strong {
-            font-size: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -92,10 +104,11 @@
         <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
         <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
@@ -114,12 +127,12 @@
         <div class="animal-header-card">
             <div class="animal-avatar-placeholder"></div>
             <div class="animal-header-info">
-                <h2>Mimosa</h2>
-                <p>Brinco #0231</p>
+                <h2 id="animal-name-header">--</h2>
+                <div class="earring-tag" id="animal-earring-header">Brinco --</div>
                 <div class="animal-meta-inline">
-                    <span>Nelore</span>
-                    <span>Fêmea</span>
-                    <span>3 anos</span>
+                    <span id="meta-race">--</span>
+                    <span id="meta-sex">--</span>
+                    <span id="meta-age">--</span>
                 </div>
             </div>
         </div>
@@ -133,15 +146,128 @@
         <div class="detail-card-grid">
             <div class="detail-mini-card">
                 <span>Nome</span>
-                <strong>Mimosa</strong>
+                <strong id="card-name">--</strong>
             </div>
+
             <div class="detail-mini-card">
                 <span>Brinco</span>
-                <strong>#0231</strong>
+                <strong id="card-earring">--</strong>
+            </div>
+
+            <div class="detail-mini-card">
+                <span>Sexo</span>
+                <strong id="card-sex">--</strong>
+            </div>
+
+            <div class="detail-mini-card">
+                <span>Raça</span>
+                <strong id="card-race">--</strong>
+            </div>
+
+            <div class="detail-mini-card">
+                <span>Peso</span>
+                <strong id="card-weight">--</strong>
+            </div>
+
+            <div class="detail-mini-card">
+                <span>Data</span>
+                <strong id="card-date">--</strong>
             </div>
         </div>
     </section>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            const histTab = document.getElementById('nav-historico');
+            const userTab = document.getElementById('nav-usuarios');
+            if (histTab) histTab.style.display = 'none';
+            if (userTab) userTab.style.display = 'none';
+        }
+
+        loadAnimalDetails();
+    });
+
+    async function loadAnimalDetails() {
+        const token = localStorage.getItem('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const animalId = urlParams.get('id') || '1';
+
+        try {
+            const response = await fetch('/animals/' + animalId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const animal = await response.json();
+                populateDetails(animal);
+            } else {
+                fallbackAnimalDetails(animalId);
+            }
+        } catch (error) {
+            fallbackAnimalDetails(animalId);
+        }
+    }
+
+    function populateDetails(animal) {
+        document.getElementById('animal-name-header').innerText = animal.name || 'Mimosa';
+        document.getElementById('animal-earring-header').innerText = 'Brinco ' + (animal.earring || '#0231');
+        document.getElementById('meta-race').innerText = animal.race || 'Nelore';
+        document.getElementById('meta-sex').innerText = animal.sex || 'Fêmea';
+        document.getElementById('meta-age').innerText = calculateAge(animal.bornIn);
+
+        document.getElementById('card-name').innerText = animal.name || 'Mimosa';
+        document.getElementById('card-earring').innerText = animal.earring || '#0231';
+        document.getElementById('card-sex').innerText = animal.sex || 'Fêmea';
+        document.getElementById('card-race').innerText = animal.race || 'Nelore';
+        document.getElementById('card-weight').innerText = animal.weight ? animal.weight + ' kg' : '480 kg';
+        document.getElementById('card-date').innerText = formatDate(animal.bornIn) || '12/03/2022';
+    }
+
+    function fallbackAnimalDetails(id) {
+        const mockData = {
+            '1': { name: 'Mimosa', earring: '#0231', sex: 'Fêmea', race: 'Nelore', weight: 480, bornIn: '2022-03-12' },
+            '2': { name: 'Afrodit', earring: '#0398', sex: 'Fêmea', race: 'Holandesa', weight: 480, bornIn: '2020-03-15' },
+            '3': { name: 'Thor', earring: '#0567', sex: 'Macho', race: 'Angus', weight: 480, bornIn: '2024-06-30' },
+            '4': { name: 'Jao', earring: '#0898', sex: 'Macho', race: 'Nelore', weight: 480, bornIn: '2023-03-06' },
+            '5': { name: 'Amora', earring: '#0911', sex: 'Fêmea', race: 'Nelore', weight: 480, bornIn: '2022-05-10' },
+            '6': { name: 'Froid', earring: '#0999', sex: 'Macho', race: 'Senepol', weight: 480, bornIn: '2019-03-11' }
+        };
+
+        const animal = mockData[id] || mockData['1'];
+        populateDetails(animal);
+    }
+
+    function calculateAge(dateStr) {
+        if (!dateStr) return '3 anos';
+        const birthDate = new Date(dateStr);
+        const ageDifMs = Date.now() - birthDate.getTime();
+        const ageDate = new Date(ageDifMs);
+        const years = Math.abs(ageDate.getUTCFullYear() - 1970);
+        return years + (years === 1 ? ' ano' : ' anos');
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '12/03/2022';
+        const parts = dateStr.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return dateStr;
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
 
 </body>
 </html>

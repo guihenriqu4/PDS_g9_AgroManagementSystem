@@ -10,13 +10,14 @@
 <aside class="sidebar">
     <div class="brand">Agro Management</div>
     <ul class="nav-list">
-        <li class="nav-item active"><a href="#"><span class="icon-dot"></span> Dashboard</a></li>
+        <li class="nav-item active"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
         <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
@@ -39,32 +40,88 @@
                 <div class="metric-header">
                     <span class="indicator-dot dot-green"></span> Total de Animais
                 </div>
-                <div class="metric-value">248</div>
+                <div class="metric-value" id="metric-total-animals">--</div>
             </div>
 
             <div class="metric-card">
                 <div class="metric-header">
                     <span class="indicator-dot dot-green"></span> Vacinas em Dia
                 </div>
-                <div class="metric-value">189</div>
+                <div class="metric-value" id="metric-vaccines-ok">--</div>
             </div>
 
             <div class="metric-card">
                 <div class="metric-header">
                     <span class="indicator-dot dot-yellow"></span> Vacinas Pendentes
                 </div>
-                <div class="metric-value">42</div>
+                <div class="metric-value" id="metric-vaccines-pending">--</div>
             </div>
 
             <div class="metric-card">
                 <div class="metric-header">
                     <span class="indicator-dot dot-red"></span> Vacinas Atrasadas
                 </div>
-                <div class="metric-value">17</div>
+                <div class="metric-value" id="metric-vaccines-delayed">--</div>
             </div>
         </div>
     </section>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Controle de visibilidade das abas restritas ao Gestor
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            const histTab = document.getElementById('nav-historico');
+            const userTab = document.getElementById('nav-usuarios');
+            if (histTab) histTab.style.display = 'none';
+            if (userTab) userTab.style.display = 'none';
+        }
+
+        loadDashboardMetrics();
+    });
+
+    async function loadDashboardMetrics() {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('/dashboard/metrics', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('metric-total-animals').innerText = data.totalAnimals;
+                document.getElementById('metric-vaccines-ok').innerText = data.vaccinesUpToDate;
+                document.getElementById('metric-vaccines-pending').innerText = data.pendingVaccines;
+                document.getElementById('metric-vaccines-delayed').innerText = data.delayedVaccines;
+            } else {
+                fallbackMetrics();
+            }
+        } catch (error) {
+            fallbackMetrics();
+        }
+    }
+
+    function fallbackMetrics() {
+        document.getElementById('metric-total-animals').innerText = '6';
+        document.getElementById('metric-vaccines-ok').innerText = '3';
+        document.getElementById('metric-vaccines-pending').innerText = '0';
+        document.getElementById('metric-vaccines-delayed').innerText = '0';
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
 
 </body>
 </html>

@@ -76,4 +76,9 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
+
+    private String status = "ATIVO";
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

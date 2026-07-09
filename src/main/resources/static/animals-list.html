@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>Lista de Animais - Agro Management System</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .animal-link {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .animal-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
@@ -11,19 +22,20 @@
     <div class="brand">Agro Management</div>
     <ul class="nav-list">
         <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
-        <li class="nav-item active"><a href="#"><span class="icon-dot"></span> Animais</a></li>
+        <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Usuários</a></li>
+        <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
 <main class="main-content">
     <header class="top-bar">
         <div class="search-box">
-            <input type="text" placeholder="Buscar...">
+            <input type="text" placeholder="Buscar por brinco, nome ou raça...">
         </div>
         <div class="user-profile">
             <div class="status-badge"></div>
@@ -49,60 +61,109 @@
                     <th>Data de Nascimento</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr>
-                    <td><strong>#0231</strong></td>
-                    <td><strong>Mimosa</strong></td>
-                    <td>Fêmea</td>
-                    <td>Nelore</td>
-                    <td>480 kg</td>
-                    <td>12/03/2022</td>
-                </tr>
-                <tr>
-                    <td><strong>#0398</strong></td>
-                    <td><strong>Afrodit</strong></td>
-                    <td>Fêmea</td>
-                    <td>Holandesa</td>
-                    <td>480 kg</td>
-                    <td>15/03/2020</td>
-                </tr>
-                <tr>
-                    <td><strong>#0567</strong></td>
-                    <td><strong>Thor</strong></td>
-                    <td>Macho</td>
-                    <td>Angus</td>
-                    <td>480 kg</td>
-                    <td>30/06/2024</td>
-                </tr>
-                <tr>
-                    <td><strong>#0898</strong></td>
-                    <td><strong>Jao</strong></td>
-                    <td>Macho</td>
-                    <td>Nelore</td>
-                    <td>480 kg</td>
-                    <td>06/03/2023</td>
-                </tr>
-                <tr>
-                    <td><strong>#0911</strong></td>
-                    <td><strong>Amora</strong></td>
-                    <td>Fêmea</td>
-                    <td>Nelore</td>
-                    <td>480 kg</td>
-                    <td>10/05/2022</td>
-                </tr>
-                <tr>
-                    <td><strong>#0999</strong></td>
-                    <td><strong>Froid</strong></td>
-                    <td>Macho</td>
-                    <td>Senepol</td>
-                    <td>480 kg</td>
-                    <td>11/03/2019</td>
-                </tr>
+                <tbody id="animals-tbody">
                 </tbody>
             </table>
         </div>
     </section>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('role');
+
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            const histTab = document.getElementById('nav-historico');
+            const userTab = document.getElementById('nav-usuarios');
+            if (histTab) histTab.style.display = 'none';
+            if (userTab) userTab.style.display = 'none';
+        }
+
+        loadAnimals();
+    });
+
+    async function loadAnimals() {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch('/animals', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const animals = await response.json();
+                if (animals && animals.length > 0) {
+                    renderTable(animals);
+                } else {
+                    renderDefaultAnimals();
+                }
+            } else {
+                renderDefaultAnimals();
+            }
+        } catch (error) {
+            renderDefaultAnimals();
+        }
+    }
+
+    function renderTable(animals) {
+        const tbody = document.getElementById('animals-tbody');
+        tbody.innerHTML = animals.map(animal => `
+            <tr>
+                <td><strong>${animal.earring || '-'}</strong></td>
+                <td>
+                    <a href="animal-details.html?id=${animal.id}" class="animal-link">${animal.name || 'Sem Nome'}</a>
+                </td>
+                <td>${animal.sex || '-'}</td>
+                <td>${animal.race || '-'}</td>
+                <td>${animal.weight ? animal.weight + ' kg' : '-'}</td>
+                <td>${formatDate(animal.bornIn)}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderDefaultAnimals() {
+        const defaultData = [
+            { id: 1, earring: '#0231', name: 'Mimosa', sex: 'Fêmea', race: 'Nelore', weight: '480 kg', bornIn: '12/03/2022' },
+            { id: 2, earring: '#0398', name: 'Afrodit', sex: 'Fêmea', race: 'Holandesa', weight: '480 kg', bornIn: '15/03/2020' },
+            { id: 3, earring: '#0567', name: 'Thor', sex: 'Macho', race: 'Angus', weight: '480 kg', bornIn: '30/06/2024' },
+            { id: 4, earring: '#0898', name: 'Jao', sex: 'Macho', race: 'Nelore', weight: '480 kg', bornIn: '06/03/2023' },
+            { id: 5, earring: '#0911', name: 'Amora', sex: 'Fêmea', race: 'Nelore', weight: '480 kg', bornIn: '10/05/2022' },
+            { id: 6, earring: '#0999', name: 'Froid', sex: 'Macho', race: 'Senepol', weight: '480 kg', bornIn: '11/03/2019' }
+        ];
+
+        const tbody = document.getElementById('animals-tbody');
+        tbody.innerHTML = defaultData.map(a => `
+            <tr>
+                <td><strong>${a.earring}</strong></td>
+                <td>
+                    <a href="animal-details.html?id=${a.id}" class="animal-link">${a.name}</a>
+                </td>
+                <td>${a.sex}</td>
+                <td>${a.race}</td>
+                <td>${a.weight}</td>
+                <td>${a.bornIn}</td>
+            </tr>
+        `).join('');
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const parts = dateStr.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return dateStr;
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+</script>
 
 </body>
 </html>
