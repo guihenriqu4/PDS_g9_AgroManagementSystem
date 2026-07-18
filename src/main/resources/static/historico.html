@@ -110,7 +110,7 @@
 
         // Tenta buscar o histórico real do backend Java se disponível
         try {
-            const response = await fetch('/historico/animal/1', {
+            const response = await fetch('/sanitary-history/animal/1', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             if (response.ok) {

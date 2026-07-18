@@ -1,4 +1,4 @@
-package com.agro_management.infra;
+package com.agro_management.infra.security;
 
 import com.agro_management.models.User;
 import com.agro_management.repositories.UserRepository;

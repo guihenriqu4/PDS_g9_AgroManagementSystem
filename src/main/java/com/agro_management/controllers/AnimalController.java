@@ -1,7 +1,11 @@
 package com.agro_management.controllers;
 
 import com.agro_management.models.Animal;
+import com.agro_management.models.dtos.AnimalRequestDTO;
 import com.agro_management.repositories.AnimalRepository;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,11 +45,40 @@ public class AnimalController {
         return ResponseEntity.ok(animal.get());
     }
 
-    // Rota POST para cadastrar um novo animal
     @PostMapping
-    public ResponseEntity<Animal> createAnimal(@RequestBody Animal animal) {
+    public ResponseEntity<Void> createAnimal(@RequestBody @Valid AnimalRequestDTO data) {
+        Animal animal = new Animal();
+        animal.setEarring(data.earring());
+        animal.setName(data.name());
+        animal.setSex(data.sex());
+        animal.setWeight(data.weight());
+        animal.setRace(data.race());
+        animal.setBornIn(data.bornIn());
         animal.setCreatedAt(LocalDateTime.now());
-        Animal savedAnimal = animalRepository.save(animal);
-        return ResponseEntity.ok(savedAnimal);
+        animalRepository.save(animal);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateAnimal(@PathVariable Long id, @RequestBody @Valid AnimalRequestDTO data) {
+        Optional<Animal> optionalAnimal = animalRepository.findById(id);
+        if (optionalAnimal.isEmpty()) return ResponseEntity.notFound().build();
+
+        Animal animal = optionalAnimal.get();
+        animal.setEarring(data.earring());
+        animal.setName(data.name());
+        animal.setSex(data.sex());
+        animal.setWeight(data.weight());
+        animal.setRace(data.race());
+        animal.setBornIn(data.bornIn());
+        animalRepository.save(animal);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnimal(@PathVariable Long id) {
+        if (!animalRepository.existsById(id)) return ResponseEntity.notFound().build();
+        animalRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

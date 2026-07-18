@@ -31,14 +31,15 @@ public class SecurityConfigurations {
                         .requestMatchers("/", "/index.html", "/login.html", "/*.html", "/*.css", "/*.js", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
 
-                        // 1. ABA 1: Gestão/Cadastro de Usuários (Apenas GESTOR / ROLE_ADMIN)
+                        // 1. Gestão/Cadastro de Usuários (Apenas GESTOR / ROLE_ADMIN)
                         .requestMatchers(HttpMethod.POST, "/register").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // 2. ABA 2: Histórico Sanitário e Aplicações (Apenas GESTOR / ROLE_ADMIN)
+                        // 2. Histórico Sanitário
                         .requestMatchers("/sanitary-history/**").hasRole("ADMIN")
 
-                        // Demais requisições exigem apenas autenticação (ex: ROLE_USER)
+                        // 3. Demais requisições (Animais e Vacinas, incluindo POST, PUT, DELETE) 
+                        // exigem apenas que o usuário esteja logado no sistema
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
