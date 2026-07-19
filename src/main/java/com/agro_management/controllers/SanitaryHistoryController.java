@@ -53,6 +53,17 @@ public class SanitaryHistoryController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping
+    public ResponseEntity<List<VaccineApplicationResponseDTO>> listAll() {
+        // Busca todos os registros no banco, converte para DTO e retorna
+        List<VaccineApplicationResponseDTO> allApplications = applicationRepository.findAll()
+                .stream()
+                .map(VaccineApplicationResponseDTO::new)
+                .toList();
+                
+        return ResponseEntity.ok(allApplications);
+    }
+
     // Rota GET: Buscar histórico de um animal específico
     @GetMapping("/animal/{animalId}")
     public ResponseEntity<List<VaccineApplicationResponseDTO>> getHistory(@PathVariable Long animalId) {

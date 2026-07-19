@@ -15,6 +15,9 @@ public class Vaccine {
 
     private String manufacturer;
 
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -28,6 +31,8 @@ public class Vaccine {
     public void setName(String name) { this.name = name; }
     public String getManufacturer() { return manufacturer; }
     public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
+    public Integer getStockQuantity() { return stockQuantity; }
+    public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

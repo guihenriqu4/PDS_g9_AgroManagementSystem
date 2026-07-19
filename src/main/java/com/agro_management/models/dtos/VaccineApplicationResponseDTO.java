@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public record VaccineApplicationResponseDTO(
         Long id,
+        String animalName,
         String vaccineName,
         String userName,
         LocalDate applicationDate,
@@ -14,6 +15,7 @@ public record VaccineApplicationResponseDTO(
     public VaccineApplicationResponseDTO(VaccineApplication app) {
         this(
             app.getId(), 
+            app.getAnimal().getName(),
             app.getVaccine().getName(), 
             app.getUser().getName(),
             app.getApplicationDate(), 

@@ -105,7 +105,7 @@
         <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
         <li class="nav-item"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
@@ -220,32 +220,23 @@
     }
 
     function populateDetails(animal) {
-        document.getElementById('animal-name-header').innerText = animal.name || 'Mimosa';
-        document.getElementById('animal-earring-header').innerText = 'Brinco ' + (animal.earring || '#0231');
-        document.getElementById('meta-race').innerText = animal.race || 'Nelore';
-        document.getElementById('meta-sex').innerText = animal.sex || 'Fêmea';
+        document.getElementById('animal-name-header').innerText = animal.name || 'Sem nome';
+        document.getElementById('animal-earring-header').innerText = 'Brinco ' + (animal.earring || 'S/N');
+        document.getElementById('meta-race').innerText = animal.race || '-';
+        document.getElementById('meta-sex').innerText = animal.sex || '-';
         document.getElementById('meta-age').innerText = calculateAge(animal.bornIn);
 
-        document.getElementById('card-name').innerText = animal.name || 'Mimosa';
-        document.getElementById('card-earring').innerText = animal.earring || '#0231';
-        document.getElementById('card-sex').innerText = animal.sex || 'Fêmea';
-        document.getElementById('card-race').innerText = animal.race || 'Nelore';
-        document.getElementById('card-weight').innerText = animal.weight ? animal.weight + ' kg' : '480 kg';
-        document.getElementById('card-date').innerText = formatDate(animal.bornIn) || '12/03/2022';
+        document.getElementById('card-name').innerText = animal.name || '-';
+        document.getElementById('card-earring').innerText = animal.earring || '-';
+        document.getElementById('card-sex').innerText = animal.sex || '-';
+        document.getElementById('card-race').innerText = animal.race || '-';
+        document.getElementById('card-weight').innerText = animal.weight ? animal.weight + ' kg' : '-';
+        document.getElementById('card-date').innerText = formatDate(animal.bornIn) || '-';
     }
 
     function fallbackAnimalDetails(id) {
-        const mockData = {
-            '1': { name: 'Mimosa', earring: '#0231', sex: 'Fêmea', race: 'Nelore', weight: 480, bornIn: '2022-03-12' },
-            '2': { name: 'Afrodit', earring: '#0398', sex: 'Fêmea', race: 'Holandesa', weight: 480, bornIn: '2020-03-15' },
-            '3': { name: 'Thor', earring: '#0567', sex: 'Macho', race: 'Angus', weight: 480, bornIn: '2024-06-30' },
-            '4': { name: 'Jao', earring: '#0898', sex: 'Macho', race: 'Nelore', weight: 480, bornIn: '2023-03-06' },
-            '5': { name: 'Amora', earring: '#0911', sex: 'Fêmea', race: 'Nelore', weight: 480, bornIn: '2022-05-10' },
-            '6': { name: 'Froid', earring: '#0999', sex: 'Macho', race: 'Senepol', weight: 480, bornIn: '2019-03-11' }
-        };
-
-        const animal = mockData[id] || mockData['1'];
-        populateDetails(animal);
+        alert("Erro ao carregar os dados do animal.");
+        window.location.href = 'animals-list.html'; // Volta pra lista
     }
 
     function calculateAge(dateStr) {

@@ -27,6 +27,7 @@ public class VaccineController {
         Vaccine vaccine = new Vaccine();
         vaccine.setName(data.name());
         vaccine.setManufacturer(data.manufacturer());
+        vaccine.setStockQuantity(data.stockQuantity());
         vaccine.setCreatedAt(LocalDateTime.now());
         vaccineRepository.save(vaccine);
         return ResponseEntity.ok().build();
@@ -35,15 +36,12 @@ public class VaccineController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateVaccine(@PathVariable Long id, @RequestBody @Valid VaccineRequestDTO data) {
         Optional<Vaccine> optionalVaccine = vaccineRepository.findById(id);
-
-        if (optionalVaccine.isEmpty()) {
-            return ResponseEntity.notFound().build(); // Retorna 404 se a vacina não existir
-        }
+        if (optionalVaccine.isEmpty()) return ResponseEntity.notFound().build();
 
         Vaccine vaccine = optionalVaccine.get();
         vaccine.setName(data.name());
         vaccine.setManufacturer(data.manufacturer());
-
+        vaccine.setStockQuantity(data.stockQuantity());
         vaccineRepository.save(vaccine);
         return ResponseEntity.ok().build();
     }

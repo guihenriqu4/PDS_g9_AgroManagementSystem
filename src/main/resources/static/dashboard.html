@@ -4,51 +4,14 @@
     <meta charset="UTF-8">
     <title>Dashboard - Agro Management System</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Chart.js para renderizar os gráficos de situação -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .card-info {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #eaedf1;
-        }
-        .card-info h3 {
-            margin: 0 0 10px 0;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-        .card-info .valor {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .charts-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .chart-box {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #eaedf1;
-        }
-        .chart-box h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            color: #2c3e50;
-        }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card-info { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eaedf1; }
+        .card-info h3 { margin: 0 0 10px 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+        .card-info .valor { font-size: 2rem; font-weight: bold; color: #2c3e50; }
+        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eaedf1; }
     </style>
 </head>
 <body>
@@ -60,11 +23,11 @@
         <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
         <li class="nav-item"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
-        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>    </ul>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
@@ -72,166 +35,108 @@
     <section class="content-body">
         <h1 style="font-size: 2.2rem; font-weight: bold; margin-bottom: 24px;">Dashboard Sanitário</h1>
 
-        <!-- Cards de Indicadores Rápidos alimentados pelo Fetch -->
         <div class="dashboard-grid">
-            <div class="card-info">
-                <h3>Total de Aplicações</h3>
-                <div class="valor" id="cardTotal">...</div>
-            </div>
-            <div class="card-info">
-                <h3>Vacinações Em Dia</h3>
-                <div class="valor" style="color: #2ecc71;" id="cardEmDia">...</div>
-            </div>
-            <div class="card-info">
-                <h3>Doses Pendentes</h3>
-                <div class="valor" style="color: #f39c12;" id="cardPendentes">...</div>
-            </div>
-            <div class="card-info">
-                <h3>Aplicações Atrasadas</h3>
-                <div class="valor" style="color: #e74c3c;" id="cardAtrasadas">...</div>
-            </div>
+            <div class="card-info"><h3>Total de Animais</h3><div class="valor" id="cardTotal">0</div></div>
+            <div class="card-info"><h3>Vacinações Em Dia</h3><div class="valor" style="color: #2ecc71;" id="cardEmDia">0</div></div>
+            <div class="card-info"><h3>Doses Pendentes</h3><div class="valor" style="color: #f39c12;" id="cardPendentes">0</div></div>
+            <div class="card-info"><h3>Aplicações Atrasadas</h3><div class="valor" style="color: #e74c3c;" id="cardAtrasadas">0</div></div>
         </div>
 
-        <!-- Seção de Gráficos Dinâmicos -->
         <div class="charts-container">
             <div class="chart-box">
-                <h2>Situação Geral da Vacinação</h2>
-                <div style="position: relative; height:250px;">
-                    <canvas id="chartSituacao"></canvas>
-                </div>
+                <h2>Situação Geral</h2>
+                <div style="position: relative; height:250px;"><canvas id="chartSituacao"></canvas></div>
             </div>
-            <div class="chart-box">
-                <h2>Alertas Críticos de Estoque Vs Demanda</h2>
-                <div style="position: relative; height:250px;">
-                    <canvas id="chartEstoque"></canvas>
-                </div>
-            </div>
+            <!-- O gráfico de estoque pode ser mantido aqui seguindo a lógica anterior -->
+            <div class="chart-box"><h2>Alertas de Estoque</h2><div style="position: relative; height:250px;"><canvas id="chartEstoque"></canvas></div></div>
         </div>
     </section>
 </main>
 
 <script>
-    const token = localStorage.getItem('token');
     let chartSituacaoInstancia = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-        carregarDadosDoBackend();
+        if (!localStorage.getItem('token')) window.location.href = 'index.html';
+        carregarDashboard();
+        carregarGraficoEstoque();
     });
 
-    async function carregarDadosDoBackend() {
+    async function carregarDashboard() {
+        const token = localStorage.getItem('token');
         try {
-            // Buscando os dados reais do seu endpoint de vacinação
-            const response = await fetch('/vaccinations', {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
+            const response = await fetch('/dashboard/metrics', {
+                headers: { 'Authorization': 'Bearer ' + token }
             });
-
+            
             if (response.ok) {
-                const vacinacoesReais = await response.json();
-                processarDashboard(vacinacoesReais);
-            } else {
-                console.error("Erro ao carregar dados do dashboard do servidor. Usando fallback local.");
-                // Fallback caso o banco esteja vazio ou offline durante o teste do painel
-                const fallback = JSON.parse(localStorage.getItem('mock_vacinacoes')) || [];
-                processarDashboard(fallback);
+                const data = await response.json();
+                
+                // Atualiza Cards
+                document.getElementById('cardTotal').innerText = data.totalAnimals;
+                document.getElementById('cardEmDia').innerText = data.vaccinesUpToDate;
+                document.getElementById('cardPendentes').innerText = data.pendingVaccines;
+                document.getElementById('cardAtrasadas').innerText = data.delayedVaccines;
+
+                // Renderiza Gráfico
+                renderizarGrafico(data.vaccinesUpToDate, data.pendingVaccines, data.delayedVaccines);
             }
         } catch (error) {
-            console.error("Erro na conexão com o backend:", error);
-            const fallback = JSON.parse(localStorage.getItem('mock_vacinacoes')) || [];
-            processarDashboard(fallback);
+            console.error("Erro ao carregar métricas:", error);
         }
     }
 
-    function processarDashboard(vacinacoes) {
-        // Contadores para os Cards baseados no array recebido (seja via Fetch ou Local)
-        const total = vacinacoes.length;
-        const emDia = vacinacoes.filter(v => v.status === 'Em Dia' || v.status === 'Em dia').length;
-        const pendentes = vacinacoes.filter(v => v.status === 'Pendente').length;
-        const atrasadas = vacinacoes.filter(v => v.status === 'Atrasada').length;
-
-        // Atualiza os elementos visuais dos Cards
-        document.getElementById('cardTotal').innerText = total;
-        document.getElementById('cardEmDia').innerText = emDia;
-        document.getElementById('cardPendentes').innerText = pendentes;
-        document.getElementById('cardAtrasadas').innerText = atrasadas;
-
-        // Renderiza Gráfico 1: Situação das Vacinas
-        const ctxSituacao = document.getElementById('chartSituacao').getContext('2d');
+    function renderizarGrafico(emDia, pendentes, atrasadas) {
+        const ctx = document.getElementById('chartSituacao').getContext('2d');
         if (chartSituacaoInstancia) chartSituacaoInstancia.destroy();
 
-        chartSituacaoInstancia = new Chart(ctxSituacao, {
+        chartSituacaoInstancia = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ['Em Dia', 'Pendente', 'Atrasada'],
                 datasets: [{
                     data: [emDia, pendentes, atrasadas],
-                    backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c'],
-                    borderWidth: 2
+                    backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c']
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
-
-        // Renderiza Gráfico 2: Cruzamento inteligente com a aba local de estoque
-        gerarGraficoEstoque(vacinacoes);
     }
 
-    function gerarGraficoEstoque(vacinacoes) {
-        const estoqueVacinas = JSON.parse(localStorage.getItem('mock_estoque_vacinas')) || [];
-        const labelsEstoque = [];
-        const dadosEstoqueAtual = [];
-        const dadosFaltaCompra = [];
-
-        estoqueVacinas.forEach(item => {
-            let demandaTotal = 0;
-            vacinacoes.forEach(v => {
-                if (v.vaccine && v.vaccine.toLowerCase().trim() === item.name.toLowerCase().trim()) {
-                    if (v.status === 'Pendente' || v.status === 'Atrasada' || v.next) {
-                        demandaTotal++;
-                    }
-                }
+    async function carregarGraficoEstoque() {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/vaccines', {
+                headers: { 'Authorization': 'Bearer ' + token }
             });
+            if (response.ok) {
+                const vacinas = await response.json();
+                
+                const labels = vacinas.map(v => v.name);
+                const data = vacinas.map(v => v.stockQuantity);
 
-            const falta = demandaTotal - item.estoque;
-            labelsEstoque.push(item.name);
-            dadosEstoqueAtual.push(item.estoque);
-            dadosFaltaCompra.push(falta > 0 ? falta : 0);
-        });
-
-        const ctxEstoque = document.getElementById('chartEstoque').getContext('2d');
-        new Chart(ctxEstoque, {
-            type: 'bar',
-            data: {
-                labels: labelsEstoque,
-                datasets: [
-                    {
-                        label: 'Disponível em Estoque',
-                        data: dadosEstoqueAtual,
-                        backgroundColor: '#4a90e2'
+                const ctx = document.getElementById('chartEstoque').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Unidades em Estoque',
+                            data: data,
+                            backgroundColor: '#4a90e2'
+                        }]
                     },
-                    {
-                        label: 'Falta Comprar (Déficit)',
-                        data: dadosFaltaCompra,
-                        backgroundColor: '#e74c3c'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true },
-                    y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
-                },
-                plugins: { legend: { position: 'bottom' } }
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
             }
-        });
+        } catch (error) {
+            console.error("Erro ao carregar estoque:", error);
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
     }
 </script>
 </body>

@@ -43,11 +43,12 @@
         <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
         <li class="nav-item"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
-        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>    </ul>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
+    </ul>
 </aside>
 
 <main class="main-content">
@@ -157,12 +158,26 @@
         window.location.href = `animal-form.html?id=${id}`;
     }
 
-    function acaoExcluir(id) {
+    async function acaoExcluir(id) {
         const animal = todosAnimais.find(a => a.id === id);
         if (animal && confirm(`Tem certeza que deseja excluir o animal ${animal.name}?`)) {
-            // Remove localmente apenas da tela
-            todosAnimais = todosAnimais.filter(a => a.id !== id);
-            renderizarTabela(todosAnimais);
+            try {
+                const response = await fetch(`/animals/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok || response.status === 204) {
+                    alert('Animal excluído com sucesso!');
+                    carregarAnimaisDoBackend(); // Recarrega a lista
+                } else if (response.status === 409) {
+                    alert('Aviso: Não é possível excluir este animal, pois ele já tomou vacinas (está no histórico).');
+                } else {
+                    alert('Erro ao tentar excluir o animal.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
         }
     }
 

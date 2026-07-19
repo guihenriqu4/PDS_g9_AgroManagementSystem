@@ -86,28 +86,31 @@
         <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
         <li class="nav-item active"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
         <li class="nav-item"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
-        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>    </ul>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
 
 <main class="main-content">
     <section class="content-body">
-
-        <!-- Formulário Oculto estilo Cadastro Usuários -->
+        <!-- Formulário -->
         <div id="formularioEstoque" class="secao-formulario">
-            <h1 class="form-title" id="formTitle">Editar Vacina no Estoque</h1>
-            <form onsubmit="salvarEstoque(event)">
+            <h1 class="form-title" id="formTitle">Gerenciar Vacina</h1>
+            <form id="vacinaForm">
                 <input type="hidden" id="vacinaId">
                 <div class="form-group">
                     <label>Nome da Vacina</label>
                     <input type="text" id="name" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label>Quantidade Disponível em Estoque</label>
+                    <label>Fabricante</label>
+                    <input type="text" id="fabricante" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Quantidade em Estoque</label>
                     <input type="number" id="estoque" class="form-control" min="0" required>
                 </div>
                 <div class="btn-group">
@@ -117,102 +120,101 @@
             </form>
         </div>
 
-        <!-- Listagem Principal -->
+        <!-- Listagem -->
         <div id="listagemEstoque">
             <div class="vacina-header">
                 <h1 style="font-size: 2.2rem; font-weight: bold; margin: 0;">Estoque de Vacinas</h1>
                 <button class="btn-nova-vacina" onclick="abrirFormNovo()">+ Cadastrar Vacina</button>
             </div>
-
             <div class="vacina-grid">
                 <div class="vacina-row-header">
                     <div>Nome da Vacina</div>
-                    <div>Quantidade em Estoque</div>
-                    <div>Necessidade de Compra (Demanda Real)</div>
+                    <div>Quantidade</div>
+                    <div>Status</div>
                     <div class="text-center">Ações</div>
                 </div>
-                <div id="estoqueContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                <div id="estoqueContainer"></div>
             </div>
         </div>
     </section>
 </main>
 
 <script>
-    const estoqueInicial = [
-        { id: 101, name: "Febre Aftosa", estoque: 0 },
-        { id: 102, name: "Brucelose", estoque: 5 },
-        { id: 103, name: "Raiva", estoque: 1 },
-        { id: 104, name: "Leptospirose", estoque: 10 },
-        { id: 105, name: "Costridioses", estoque: 3 }
-    ];
+    const token = localStorage.getItem('token');
 
-    if (!localStorage.getItem('mock_estoque_vacinas')) {
-        localStorage.setItem('mock_estoque_vacinas', JSON.stringify(estoqueInicial));
-    }
-
-    function obterEstoque() { return JSON.parse(localStorage.getItem('mock_estoque_vacinas')); }
-
-    function calcularDosesNecessarias(nomeVacina) {
-        const vacinacoes = JSON.parse(localStorage.getItem('mock_vacinacoes')) || [];
-        let countNecessario = 0;
-        vacinacoes.forEach(v => {
-            if (v.vaccine && v.vaccine.toLowerCase().trim() === nomeVacina.toLowerCase().trim()) {
-                if (v.status === 'Pendente' || v.status === 'Atrasada' || v.next) {
-                    countNecessario++;
-                }
-            }
-        });
-        return countNecessario;
-    }
-
-    function renderizarEstoque() {
-        const estoqueLista = obterEstoque();
-        const container = document.getElementById('estoqueContainer');
-        container.innerHTML = '';
-
-        estoqueLista.forEach(item => {
-            const demandaTotal = calcularDosesNecessarias(item.name);
-            const falta = demandaTotal - item.estoque;
-            let statusCompra = falta > 0
-                ? `<span class="badge-comprar">Comprar ${falta} dose(s)</span> (Demanda: ${demandaTotal})`
-                : `<span class="badge-ok">Estoque Suficiente</span>`;
-
-            const card = document.createElement('div');
-            card.className = 'vacina-card';
-            card.innerHTML = `
-                <div>${item.name}</div>
-                <div>${item.estoque} unidades</div>
-                <div>${statusCompra}</div>
-                <div class="text-center">
-                    <button class="btn-editar" onclick="abrirFormEditar(${item.id})">Editar</button>
-                    <button class="btn-excluir" onclick="excluirVacinaEstoque(${item.id})">Excluir</button>
+    async function carregarEstoque() {
+        try {
+            const response = await fetch('/vaccines', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            const container = document.getElementById('estoqueContainer');
+            container.innerHTML = data.map(item => `
+                <div class="vacina-card">
+                    <div>${item.name}</div>
+                    <div>${item.stockQuantity} unidades</div>
+                    <div>${item.stockQuantity < 5 ? '<span class="badge-comprar">Repor Estoque</span>' : '<span class="badge-ok">Suficiente</span>'}</div>
+                    <div class="text-center">
+                        <button class="btn-editar" onclick="abrirFormEditar(${item.id}, '${item.name}', ${item.stockQuantity})">Editar</button>
+                        <button class="btn-excluir" onclick="excluirVacina(${item.id})">Excluir</button>
+                    </div>
                 </div>
-            `;
-            container.appendChild(card);
+            `).join('');
+        } catch (e) { console.error('Erro ao buscar vacinas:', e); }
+    }
+
+    document.getElementById('vacinaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('vacinaId').value;
+        const payload = {
+            name: document.getElementById('name').value,
+            manufacturer: document.getElementById('fabricante').value,
+            stockQuantity: parseInt(document.getElementById('estoque').value)
+        };
+
+        await fetch(id ? `/vaccines/${id}` : '/vaccines', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify(payload)
         });
+
+        fecharFormulario();
+        carregarEstoque();
+    });
+
+    async function excluirVacina(id) {
+        if (confirm("Deseja realmente excluir esta vacina?")) {
+            try {
+                const response = await fetch(`/vaccines/${id}`, { 
+                    method: 'DELETE', 
+                    headers: { 'Authorization': 'Bearer ' + token } 
+                });
+                
+                if (response.ok || response.status === 204) {
+                    carregarEstoque();
+                } else if (response.status === 409) {
+                    alert('Aviso: Não é possível excluir esta vacina, pois ela já foi aplicada em animais (consta no histórico).');
+                } else {
+                    alert('Erro ao tentar excluir a vacina.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
     }
 
     function abrirFormNovo() {
+        document.getElementById('vacinaId').value = '';
         document.getElementById('listagemEstoque').style.display = 'none';
         document.getElementById('formularioEstoque').style.display = 'block';
-        document.getElementById('formTitle').innerText = "Cadastrar Nova Vacina";
-        document.getElementById('vacinaId').value = '';
-        document.getElementById('name').value = '';
-        document.getElementById('estoque').value = '0';
     }
 
-    function abrirFormEditar(id) {
-        const lista = obterEstoque();
-        const item = lista.find(v => v.id === id);
-        if (!item) return;
-
+    function abrirFormEditar(id, name, stock) {
+        document.getElementById('vacinaId').value = id;
+        document.getElementById('name').value = name;
+        document.getElementById('estoque').value = stock;
         document.getElementById('listagemEstoque').style.display = 'none';
         document.getElementById('formularioEstoque').style.display = 'block';
-        document.getElementById('formTitle').innerText = "Editar Vacina no Estoque";
-
-        document.getElementById('vacinaId').value = item.id;
-        document.getElementById('name').value = item.name;
-        document.getElementById('estoque').value = item.estoque;
     }
 
     function fecharFormulario() {
@@ -220,39 +222,7 @@
         document.getElementById('listagemEstoque').style.display = 'block';
     }
 
-    function salvarEstoque(event) {
-        event.preventDefault();
-        const id = document.getElementById('vacinaId').value;
-        let lista = obterEstoque();
-
-        if (id) {
-            const item = lista.find(v => v.id == id);
-            if (item) {
-                item.name = document.getElementById('name').value;
-                item.estoque = parseInt(document.getElementById('estoque').value, 10);
-            }
-        } else {
-            lista.push({
-                id: Date.now(),
-                name: document.getElementById('name').value,
-                estoque: parseInt(document.getElementById('estoque').value, 10)
-            });
-        }
-
-        localStorage.setItem('mock_estoque_vacinas', JSON.stringify(lista));
-        fecharFormulario();
-        renderizarEstoque();
-    }
-
-    function excluirVacinaEstoque(id) {
-        if (confirm("Deseja realmente remover esta vacina do controle de estoque?")) {
-            const lista = obterEstoque().filter(v => v.id !== id);
-            localStorage.setItem('mock_estoque_vacinas', JSON.stringify(lista));
-            renderizarEstoque();
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => renderizarEstoque());
+    document.addEventListener('DOMContentLoaded', carregarEstoque);
 </script>
 </body>
 </html>
