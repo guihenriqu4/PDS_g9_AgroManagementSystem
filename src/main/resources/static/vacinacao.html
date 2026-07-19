@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Vacinação - Agro Management System</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .vacina-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .btn-registrar-vacina {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .btn-registrar-vacina:hover { background-color: #219653; }
+
+    .vacina-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .vacina-row-header {
+      display: grid;
+      grid-template-columns: 1.2fr 1.5fr 1.2fr 1.2fr 1fr 1fr;
+      padding: 16px 24px;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .vacina-card {
+      display: grid;
+      grid-template-columns: 1.2fr 1.5fr 1.2fr 1.2fr 1fr 1fr;
+      align-items: center;
+      background-color: white;
+      padding: 20px 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #eaedf1;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .vacina-card:nth-child(even) { background-color: #f8f9fa; }
+
+    .texto-status {
+      font-weight: bold;
+      font-size: 1rem;
+      background: none !important;
+      border-radius: 0 !important;
+      width: auto !important;
+      height: auto !important;
+    }
+    .status-pendente { color: #f39c12 !important; }
+    .status-emdia { color: #2ecc71 !important; }
+    .status-atrasada { color: #e74c3c !important; }
+
+    .btn-editar { background-color: #4a90e2; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 8px; font-size: 0.9rem; }
+    .btn-editar:hover { background-color: #357abd; }
+    .btn-excluir { background-color: #f44336; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+    .btn-excluir:hover { background-color: #d32f2f; }
+    .text-center { text-align: center; }
+
+    /* Estilos do Formulário Embutido (Igual ao de Usuários) */
+    .secao-formulario {
+      display: none; /* Escondido por padrão */
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+    .form-title { font-size: 1.8rem; font-weight: bold; color: #1a2a3a; margin-bottom: 24px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: bold; color: #2c3e50; margin-bottom: 8px; font-size: 0.95rem; }
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid #dcdde1; border-radius: 8px; font-size: 1rem; color: #2c3e50; box-sizing: border-box; background-color: white; }
+    .form-control:focus { outline: none; border-color: #27ae60; }
+    .btn-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+    .btn-cancelar { background-color: white; color: #2c3e50; border: 1px solid #dcdde1; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn-cancelar:hover { background-color: #f8f9fa; }
+    .btn-salvar { background-color: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn-salvar:hover { background-color: #219653; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">Agro Management</div>
+  <ul class="nav-list">
+    <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
+    <li class="nav-item"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
+    <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
+    <li class="nav-item active"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
+    <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
+    <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+    <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
+    <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
+    <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>    </ul>
+  </ul>
+</aside>
+
+<main class="main-content">
+  <section class="content-body">
+
+    <!-- Formulário Oculto que aparece ao Criar/Editar -->
+    <div id="formularioVacinacao" class="secao-formulario">
+      <h1 class="form-title" id="formTitle">Editar Registro de Vacinação</h1>
+      <form onsubmit="salvarVacinacao(event)">
+        <input type="hidden" id="vacinacaoId">
+        <div class="form-group">
+          <label>Animal</label>
+          <input type="text" id="animal" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Vacina</label>
+          <input type="text" id="vaccine" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Data da Aplicação</label>
+          <input type="text" id="date" class="form-control" placeholder="DD/MM/AAAA" required>
+        </div>
+        <div class="form-group">
+          <label>Próxima Dose</label>
+          <input type="text" id="next" class="form-control" placeholder="DD/MM/AAAA">
+        </div>
+        <div class="form-group">
+          <label>Status da Vacinação</label>
+          <select id="status" class="form-control">
+            <option value="Em Dia">Em Dia</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Atrasada">Atrasada</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn-cancelar" onclick="fecharFormulario()">Cancelar</button>
+          <button type="submit" class="btn-salvar">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Listagem Principal -->
+    <div id="listagemVacinacao">
+      <div class="vacina-header">
+        <h1 style="font-size: 2.2rem; font-weight: bold; margin: 0;">Vacinação</h1>
+        <button class="btn-registrar-vacina" onclick="abrirFormNovo()">+ Registrar Vacina</button>
+      </div>
+
+      <div class="vacina-grid">
+        <div class="vacina-row-header">
+          <div>Animal</div>
+          <div>Vacina</div>
+          <div>Data da Aplicação</div>
+          <div>Próxima Dose</div>
+          <div>Status</div>
+          <div class="text-center">Ações</div>
+        </div>
+        <div id="vacinasContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const registrosIniciais = [
+    { id: 1, animal: "Mimosa", vaccine: "Febre Aftosa", date: "20/06/2026", next: "20/01/2027", status: "Pendente" },
+    { id: 2, animal: "Thor", vaccine: "Brucelose", date: "07/01/2026", next: "07/07/2026", status: "Em Dia" },
+    { id: 3, animal: "Jao", vaccine: "Raiva", date: "30/05/2026", next: "30/12/2026", status: "Atrasada" },
+    { id: 4, animal: "Amora", vaccine: "Leptospirose", date: "08/03/2026", next: "08/10/2026", status: "Em Dia" },
+    { id: 5, animal: "Froid", vaccine: "Costridioses", date: "17/04/2026", next: "17/11/2026", status: "Em Dia" },
+    { id: 6, animal: "Afrodit", vaccine: "Raiva", date: "09/01/2026", next: "09/07/2026", status: "Em Dia" }
+  ];
+
+  if (!localStorage.getItem('mock_vacinacoes')) {
+    localStorage.setItem('mock_vacinacoes', JSON.stringify(registrosIniciais));
+  }
+
+  function obterVacinacoes() { return JSON.parse(localStorage.getItem('mock_vacinacoes')); }
+
+  function carregarVacinacoes() {
+    const lista = obterVacinacoes();
+    const container = document.getElementById('vacinasContainer');
+    container.innerHTML = '';
+
+    lista.forEach(item => {
+      let classStatus = 'status-emdia';
+      if (item.status === 'Pendente') classStatus = 'status-pendente';
+      if (item.status === 'Atrasada') classStatus = 'status-atrasada';
+
+      const card = document.createElement('div');
+      card.className = 'vacina-card';
+      card.innerHTML = `
+                <div>${item.animal}</div>
+                <div>${item.vaccine}</div>
+                <div>${item.date}</div>
+                <div>${item.next}</div>
+                <div class="texto-status ${classStatus}">${item.status}</div>
+                <div class="text-center">
+                    <button class="btn-editar" onclick="abrirFormEditar(${item.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirVacinacao(${item.id})">Excluir</button>
+                </div>
+            `;
+      container.appendChild(card);
+    });
+  }
+
+  // Controle de exibição das seções (Igual tela de Usuários)
+  function abrirFormNovo() {
+    document.getElementById('listagemVacinacao').style.display = 'none';
+    document.getElementById('formularioVacinacao').style.display = 'block';
+    document.getElementById('formTitle').innerText = "Registrar Vacinação";
+    document.getElementById('vacinacaoId').value = '';
+    document.getElementById('animal').value = '';
+    document.getElementById('vaccine').value = '';
+    document.getElementById('date').value = '';
+    document.getElementById('next').value = '';
+    document.getElementById('status').value = 'Em Dia';
+  }
+
+  function abrirFormEditar(id) {
+    const lista = obterVacinacoes();
+    const registro = lista.find(v => v.id === id);
+    if (!registro) return;
+
+    document.getElementById('listagemVacinacao').style.display = 'none';
+    document.getElementById('formularioVacinacao').style.display = 'block';
+    document.getElementById('formTitle').innerText = "Editar Registro de Vacinação";
+
+    document.getElementById('vacinacaoId').value = registro.id;
+    document.getElementById('animal').value = registro.animal;
+    document.getElementById('vaccine').value = registro.vaccine;
+    document.getElementById('date').value = registro.date;
+    document.getElementById('next').value = registro.next;
+    document.getElementById('status').value = registro.status;
+  }
+
+  function fecharFormulario() {
+    document.getElementById('formularioVacinacao').style.display = 'none';
+    document.getElementById('listagemVacinacao').style.display = 'block';
+  }
+
+  function salvarVacinacao(event) {
+    event.preventDefault();
+    const id = document.getElementById('vacinacaoId').value;
+    let lista = obterVacinacoes();
+
+    if (id) { // Modo Edição
+      const registro = lista.find(v => v.id == id);
+      if (registro) {
+        registro.animal = document.getElementById('animal').value;
+        registro.vaccine = document.getElementById('vaccine').value;
+        registro.date = document.getElementById('date').value;
+        registro.next = document.getElementById('next').value;
+        registro.status = document.getElementById('status').value;
+      }
+    } else { // Modo Novo Registro
+      lista.push({
+        id: Date.now(),
+        animal: document.getElementById('animal').value,
+        vaccine: document.getElementById('vaccine').value,
+        date: document.getElementById('date').value,
+        next: document.getElementById('next').value,
+        status: document.getElementById('status').value
+      });
+    }
+
+    localStorage.setItem('mock_vacinacoes', JSON.stringify(lista));
+    fecharFormulario();
+    carregarVacinacoes();
+  }
+
+  function excluirVacinacao(id) {
+    if (confirm("Deseja realmente remover este registro de vacinação?")) {
+      const lista = obterVacinacoes().filter(item => item.id !== id);
+      localStorage.setItem('mock_vacinacoes', JSON.stringify(lista));
+      carregarVacinacoes();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => carregarVacinacoes());
+</script>
+</body>
+</html>

@@ -5,15 +5,33 @@
     <title>Lista de Animais - Agro Management System</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .animal-link {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 700;
+        /* Estilos dos botões de ação baseados na imagem anexada */
+        .btn-editar {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.9rem;
         }
-        .animal-link:hover {
-            color: var(--primary);
-            text-decoration: underline;
+        .btn-editar:hover { background-color: #357abd; }
+
+        .btn-excluir {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
+        .btn-excluir:hover { background-color: #d32f2f; }
+
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
@@ -23,23 +41,19 @@
     <ul class="nav-list">
         <li class="nav-item"><a href="dashboard.html"><span class="icon-dot"></span> Dashboard</a></li>
         <li class="nav-item active"><a href="animals-list.html"><span class="icon-dot"></span> Animais</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Vacinação</a></li>
-        <li class="nav-item" id="nav-historico"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
+        <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
+        <li class="nav-item"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
+        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Histórico</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
         <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
-        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
-    </ul>
+        <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>    </ul>
 </aside>
 
 <main class="main-content">
     <header class="top-bar">
         <div class="search-box">
-            <input type="text" placeholder="Buscar por brinco, nome ou raça...">
-        </div>
-        <div class="user-profile">
-            <div class="status-badge"></div>
-            <div class="avatar"></div>
+            <input type="text" id="searchInput" placeholder="Buscar por brinco, nome ou raça..." oninput="filtrarAnimais()">
         </div>
     </header>
 
@@ -58,10 +72,14 @@
                     <th>Sexo</th>
                     <th>Raça</th>
                     <th>Peso</th>
-                    <th>Data de Nascimento</th>
+                    <th>Data Nasc.</th>
+                    <th class="text-center">Ações</th>
                 </tr>
                 </thead>
-                <tbody id="animals-tbody">
+                <tbody id="animalsTableBody">
+                <tr>
+                    <td colspan="7" class="text-center">Carregando animais...</td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -69,99 +87,93 @@
 </main>
 
 <script>
+    let todosAnimais = []; // Guarda a lista vinda do backend para busca local rápida
+    const token = localStorage.getItem('token');
+
     document.addEventListener('DOMContentLoaded', () => {
-        const token = localStorage.getItem('token');
-        const userRole = localStorage.getItem('role');
-
-        if (!token) {
-            window.location.href = 'index.html';
-            return;
-        }
-
-        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
-            const histTab = document.getElementById('nav-historico');
-            const userTab = document.getElementById('nav-usuarios');
-            if (histTab) histTab.style.display = 'none';
-            if (userTab) userTab.style.display = 'none';
-        }
-
-        loadAnimals();
+        carregarAnimaisDoBackend();
     });
 
-    async function loadAnimals() {
-        const token = localStorage.getItem('token');
+    async function carregarAnimaisDoBackend() {
+        const tableBody = document.getElementById('animalsTableBody');
 
         try {
             const response = await fetch('/animals', {
-                headers: { 'Authorization': 'Bearer ' + token }
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
             });
 
             if (response.ok) {
-                const animals = await response.json();
-                if (animals && animals.length > 0) {
-                    renderTable(animals);
-                } else {
-                    renderDefaultAnimals();
-                }
+                todosAnimais = await response.json();
+                renderizarTabela(todosAnimais);
+            } else if (response.status === 403 || response.status === 401) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="color: red;">⚠️ Sessão expirada. Faça login novamente.</td></tr>`;
             } else {
-                renderDefaultAnimals();
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="color: red;">Erro ao carregar a lista de animais.</td></tr>`;
             }
         } catch (error) {
-            renderDefaultAnimals();
+            console.error('Erro de conexão:', error);
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="color: red;">Erro de conexão com o servidor.</td></tr>`;
         }
     }
 
-    function renderTable(animals) {
-        const tbody = document.getElementById('animals-tbody');
-        tbody.innerHTML = animals.map(animal => `
-            <tr>
-                <td><strong>${animal.earring || '-'}</strong></td>
-                <td>
-                    <a href="animal-details.html?id=${animal.id}" class="animal-link">${animal.name || 'Sem Nome'}</a>
-                </td>
+    function renderizarTabela(lista) {
+        const tableBody = document.getElementById('animalsTableBody');
+        tableBody.innerHTML = '';
+
+        if (lista.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Nenhum animal encontrado.</td></tr>`;
+            return;
+        }
+
+        lista.forEach(animal => {
+            const row = document.createElement('tr');
+
+            let dataNasc = '-';
+            if (animal.bornIn) {
+                const partes = animal.bornIn.split('-');
+                if (partes.length === 3) dataNasc = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+
+            row.innerHTML = `
+                <td><strong>#${animal.earring || 'S/N'}</strong></td>
+                <td><strong>${animal.name || '-'}</strong></td>
                 <td>${animal.sex || '-'}</td>
                 <td>${animal.race || '-'}</td>
                 <td>${animal.weight ? animal.weight + ' kg' : '-'}</td>
-                <td>${formatDate(animal.bornIn)}</td>
-            </tr>
-        `).join('');
-    }
-
-    function renderDefaultAnimals() {
-        const defaultData = [
-            { id: 1, earring: '#0231', name: 'Mimosa', sex: 'Fêmea', race: 'Nelore', weight: '480 kg', bornIn: '12/03/2022' },
-            { id: 2, earring: '#0398', name: 'Afrodit', sex: 'Fêmea', race: 'Holandesa', weight: '480 kg', bornIn: '15/03/2020' },
-            { id: 3, earring: '#0567', name: 'Thor', sex: 'Macho', race: 'Angus', weight: '480 kg', bornIn: '30/06/2024' },
-            { id: 4, earring: '#0898', name: 'Jao', sex: 'Macho', race: 'Nelore', weight: '480 kg', bornIn: '06/03/2023' },
-            { id: 5, earring: '#0911', name: 'Amora', sex: 'Fêmea', race: 'Nelore', weight: '480 kg', bornIn: '10/05/2022' },
-            { id: 6, earring: '#0999', name: 'Froid', sex: 'Macho', race: 'Senepol', weight: '480 kg', bornIn: '11/03/2019' }
-        ];
-
-        const tbody = document.getElementById('animals-tbody');
-        tbody.innerHTML = defaultData.map(a => `
-            <tr>
-                <td><strong>${a.earring}</strong></td>
-                <td>
-                    <a href="animal-details.html?id=${a.id}" class="animal-link">${a.name}</a>
+                <td>${dataNasc}</td>
+                <td class="text-center">
+                    <button class="btn-editar" onclick="acaoEditar(${animal.id})">Editar</button>
+                    <button class="btn-excluir" onclick="acaoExcluir(${animal.id})">Excluir</button>
                 </td>
-                <td>${a.sex}</td>
-                <td>${a.race}</td>
-                <td>${a.weight}</td>
-                <td>${a.bornIn}</td>
-            </tr>
-        `).join('');
+            `;
+            tableBody.appendChild(row);
+        });
     }
 
-    function formatDate(dateStr) {
-        if (!dateStr) return '-';
-        const parts = dateStr.split('-');
-        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        return dateStr;
+    function acaoEditar(id) {
+        window.location.href = `animal-form.html?id=${id}`;
     }
 
-    function logout() {
-        localStorage.clear();
-        window.location.href = 'index.html';
+    function acaoExcluir(id) {
+        const animal = todosAnimais.find(a => a.id === id);
+        if (animal && confirm(`Tem certeza que deseja excluir o animal ${animal.name}?`)) {
+            // Remove localmente apenas da tela
+            todosAnimais = todosAnimais.filter(a => a.id !== id);
+            renderizarTabela(todosAnimais);
+        }
+    }
+
+    function filtrarAnimais() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtrados = todosAnimais.filter(a =>
+            (a.name && a.name.toLowerCase().includes(query)) ||
+            (a.earring && a.earring.toLowerCase().includes(query)) ||
+            (a.race && a.race.toLowerCase().includes(query))
+        );
+        renderizarTabela(filtrados);
     }
 </script>
 
