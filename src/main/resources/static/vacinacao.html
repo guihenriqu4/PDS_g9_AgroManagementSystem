@@ -28,9 +28,8 @@
         <li class="nav-item"><a href="vacinas.html"><span class="icon-dot"></span> Vacinas</a></li>
         <li class="nav-item active"><a href="vacinacao.html"><span class="icon-dot"></span> Vacinação</a></li>
         <li class="nav-item"><a href="historico.html"><span class="icon-dot"></span> Histórico</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Relatórios</a></li>
+        <li class="nav-item"><a href="relatorios.html"><span class="icon-dot"></span> Relatórios</a></li>
         <li class="nav-item" id="nav-usuarios"><a href="cadastro-usuario.html"><span class="icon-dot"></span> Usuários</a></li>
-        <li class="nav-item"><a href="#"><span class="icon-dot"></span> Configurações</a></li>
         <li class="nav-item" style="margin-top: auto;"><a href="#" onclick="logout()"><span class="icon-dot"></span> Sair</a></li>
     </ul>
 </aside>
@@ -39,7 +38,7 @@
     <section class="content-body">
         <!-- Formulário -->
         <div id="formularioVacinacao" class="secao-formulario">
-            <h1 id="formTitle">Editar Registro</h1>
+            <h1 id="formTitle">Registrar Vacinação</h1>
             <form onsubmit="salvarVacinacao(event)">
                 <input type="hidden" id="vacinacaoId">
                 
@@ -81,7 +80,7 @@
         <div id="listagemVacinacao">
             <div class="vacina-header">
                 <h1>Vacinação</h1>
-                <button class="btn-registrar-vacina" onclick="abrirFormNovo()">+ Registrar Vacina</button>
+                <button class="btn-registrar-vacina" onclick="abrirFormNovo()">+ Registrar Vacinação</button>
             </div>
             <div class="vacina-grid">
                 <div class="vacina-row-header">
@@ -239,22 +238,40 @@
     }
 
     function abrirFormNovo() {
+        // 1. Alterna a exibição das seções
         document.getElementById('listagemVacinacao').style.display = 'none';
         document.getElementById('formularioVacinacao').style.display = 'block';
+
+        // 2. Altera o título da tela
+        document.getElementById('formTitle').innerText = 'Registrar Vacinação';
+
+        // 3. Limpa todos os campos do formulário
         document.getElementById('vacinacaoId').value = '';
+        document.getElementById('animalId').value = '';
+        document.getElementById('vaccineId').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('next').value = '';
+        document.getElementById('status').value = 'Em Dia';
     }
 
     function abrirFormEditar(id) {
         const registro = registrosAtuais.find(v => v.id === id);
         if (!registro) return;
+
+        // 1. Alterna a exibição das seções
         document.getElementById('listagemVacinacao').style.display = 'none';
         document.getElementById('formularioVacinacao').style.display = 'block';
+
+        // 2. Altera o título da tela
+        document.getElementById('formTitle').innerText = 'Editar Registro';
+
+        // 3. Preenche os campos com os dados do registro (usando os IDs corretos dos inputs)
         document.getElementById('vacinacaoId').value = registro.id;
-        document.getElementById('animal').value = registro.animal;
-        document.getElementById('vaccine').value = registro.vaccine;
-        document.getElementById('date').value = registro.date;
-        document.getElementById('next').value = registro.next;
-        document.getElementById('status').value = registro.status;
+        document.getElementById('animalId').value = registro.animalId || '';
+        document.getElementById('vaccineId').value = registro.vaccineId || '';
+        document.getElementById('date').value = registro.applicationDate || '';
+        document.getElementById('next').value = registro.nextDoseDate || '';
+        document.getElementById('status').value = registro.observation || 'Em Dia';
     }
 
     function fecharFormulario() {
