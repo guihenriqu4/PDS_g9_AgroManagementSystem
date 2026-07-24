@@ -62,15 +62,6 @@
                     <input type="date" id="next" class="form-control">
                 </div>
                 
-                <div class="form-group">
-                    <label>Status (Observação)</label>
-                    <select id="status" class="form-control">
-                        <option value="Em Dia">Em Dia</option>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Atrasada">Atrasada</option>
-                    </select>
-                </div>
-                
                 <button type="button" class="btn-cancelar" onclick="fecharFormulario()">Cancelar</button>
                 <button type="submit" class="btn-salvar">Salvar Alterações</button>
             </form>
@@ -177,8 +168,7 @@
             vaccineId: parseInt(document.getElementById('vaccineId').value, 10),
             userId: parseInt(currentUserId, 10),
             applicationDate: document.getElementById('date').value, // Formato YYYY-MM-DD
-            nextDoseDate: document.getElementById('next').value || null,
-            observation: document.getElementById('status').value
+            nextDoseDate: document.getElementById('next').value || null
         };
 
         // Envia para o endpoint correto de histórico sanitário

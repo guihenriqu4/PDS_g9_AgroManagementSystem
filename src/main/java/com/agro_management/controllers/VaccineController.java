@@ -28,6 +28,7 @@ public class VaccineController {
         vaccine.setName(data.name());
         vaccine.setManufacturer(data.manufacturer());
         vaccine.setStockQuantity(data.stockQuantity());
+        vaccine.setPrice(data.price());
         vaccine.setCreatedAt(LocalDateTime.now());
         vaccineRepository.save(vaccine);
         return ResponseEntity.ok().build();
@@ -42,6 +43,7 @@ public class VaccineController {
         vaccine.setName(data.name());
         vaccine.setManufacturer(data.manufacturer());
         vaccine.setStockQuantity(data.stockQuantity());
+        vaccine.setPrice(data.price());
         vaccineRepository.save(vaccine);
         return ResponseEntity.ok().build();
     }

@@ -21,6 +21,8 @@ public class Vaccine {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    private Double price;
+
     // Construtor vazio
     public Vaccine() {}
 
@@ -33,6 +35,8 @@ public class Vaccine {
     public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
     public Integer getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

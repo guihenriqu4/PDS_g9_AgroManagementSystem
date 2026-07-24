@@ -154,19 +154,77 @@
             return;
         }
 
-        renderizarGraficoBarras();
+        const userRole = localStorage.getItem('role');
+        if (userRole !== 'GESTOR' && userRole !== 'ROLE_ADMIN') {
+            alert('Acesso negado.');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        carregarDadosRelatorio();
+        carregarMetricasGerais();
     });
 
-    function renderizarGraficoBarras() {
+    async function carregarDadosRelatorio() {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/reports/vaccinations-by-month', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Transforma os dados da API em arrays para o Chart.js
+                // O backend retorna os meses em número, podemos formatar para texto
+                const nomesMeses = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+                
+                // Inverte o array para mostrar os meses mais antigos primeiro da esquerda pra direita
+                data.reverse(); 
+
+                const labels = data.map(item => `${nomesMeses[item.month]}/${item.year}`);
+                const valores = data.map(item => item.total);
+
+                renderizarGraficoBarras(labels, valores);
+                
+                // Atualiza o totalizador superior
+                const totalGeral = valores.reduce((acc, curr) => acc + curr, 0);
+                document.getElementById('totalVacinas').innerText = totalGeral;
+            }
+        } catch (error) {
+            console.error("Erro ao carregar o relatório:", error);
+        }
+    }
+
+    async function carregarMetricasGerais() {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/reports/general-metrics', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Atualiza o HTML dos três cards
+                document.getElementById('taxaVacinacao').innerText = data.taxaVacinacao + '%';
+                document.getElementById('animaisMes').innerText = data.animaisMes;
+                document.getElementById('custoTotal').innerText = 'R$ ' + data.custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
+        } catch (error) {
+            console.error("Erro ao carregar métricas gerais:", error);
+        }
+    }
+
+    function renderizarGraficoBarras(labels, data) {
         const ctx = document.getElementById('chartVacinacoesMes').getContext('2d');
 
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                labels: labels,
                 datasets: [{
                     label: 'Aplicações',
-                    data: [85, 110, 95, 140, 120, 160, 130, 105, 125, 150, 115, 105],
+                    data: data,
                     backgroundColor: '#2d7a3a',
                     borderRadius: 6,
                     barThickness: 28
@@ -184,6 +242,7 @@
                     },
                     y: {
                         beginAtZero: true,
+                        ticks: { stepSize: 1 },
                         grid: { color: '#f0f0f0' }
                     }
                 }

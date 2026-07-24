@@ -30,7 +30,7 @@
         }
         .vacina-row-header {
             display: grid;
-            grid-template-columns: 0.6fr 2fr 1.8fr 1.2fr 1.5fr 1.2fr;
+            grid-template-columns: 0.6fr 2fr 1.8fr 1.2fr 1.2fr 1.5fr 1.2fr;
             padding: 16px 24px;
             color: #7f8c8d;
             font-size: 0.9rem;
@@ -38,7 +38,7 @@
         }
         .vacina-card {
             display: grid;
-            grid-template-columns: 0.6fr 2fr 1.8fr 1.2fr 1.5fr 1.2fr;
+            grid-template-columns: 0.6fr 2fr 1.8fr 1.2fr 1.2fr 1.5fr 1.2fr;
             align-items: center;
             background-color: white;
             padding: 20px 24px;
@@ -112,6 +112,10 @@
                     <label>Quantidade em Estoque</label>
                     <input type="number" id="estoque" class="form-control" min="0" required>
                 </div>
+                <div class="form-group">
+                    <label>Preço Unitário (R$)</label>
+                    <input type="number" step="0.01" id="preco" class="form-control" min="0" required>
+                </div>
                 <div class="btn-group">
                     <button type="button" class="btn-cancelar" onclick="fecharFormulario()">Cancelar</button>
                     <button type="submit" class="btn-salvar">Salvar Alterações</button>
@@ -131,6 +135,7 @@
                     <div>Nome da Vacina</div>
                     <div>Fabricante</div>
                     <div>Quantidade</div>
+                    <div>Preço (R$)</div>
                     <div>Status</div>
                     <div class="text-center">Ações</div>
                 </div>
@@ -155,11 +160,13 @@
             <div class="vacina-card">
                 <div><strong>#${item.id}</strong></div>
                 <div>${item.name}</div>
-                <div>${item.manufacturer || '-'}</div> <!-- <<< Exibe a Fabricante -->
-                <div>${item.stockQuantity} unidades</div>
+                <div>${item.manufacturer || '-'}</div>
+                <div>${item.stockQuantity} un.</div>
+                <div>R$ ${item.price ? item.price.toFixed(2) : '0.00'}</div>
                 <div>${item.stockQuantity < 5 ? '<span class="badge-comprar">Repor Estoque</span>' : '<span class="badge-ok">Suficiente</span>'}</div>
                 <div class="text-center">
-                    <button class="btn-editar" onclick="abrirFormEditar(${item.id}, '${item.name}', '${item.manufacturer || ''}', ${item.stockQuantity})">Editar</button>
+                    <!-- Adicionado item.price no onclick -->
+                    <button class="btn-editar" onclick="abrirFormEditar(${item.id}, '${item.name}', '${item.manufacturer || ''}', ${item.stockQuantity}, ${item.price || 0})">Editar</button>
                     <button class="btn-excluir" onclick="excluirVacina(${item.id})">Excluir</button>
                 </div>
             </div>
@@ -175,7 +182,8 @@
         const payload = {
             name: document.getElementById('name').value,
             manufacturer: document.getElementById('fabricante').value,
-            stockQuantity: parseInt(document.getElementById('estoque').value)
+            stockQuantity: parseInt(document.getElementById('estoque').value),
+            price: parseFloat(document.getElementById('preco').value)
         };
 
         await fetch(id ? `/vaccines/${id}` : '/vaccines', {
@@ -211,15 +219,20 @@
 
     function abrirFormNovo() {
         document.getElementById('vacinaId').value = '';
+        document.getElementById('name').value = '';
+        document.getElementById('fabricante').value = '';
+        document.getElementById('estoque').value = '';
+        document.getElementById('preco').value = '';
         document.getElementById('listagemEstoque').style.display = 'none';
         document.getElementById('formularioEstoque').style.display = 'block';
     }
 
-    function abrirFormEditar(id, name, manufacturer, stock) {
+    function abrirFormEditar(id, name, manufacturer, stock, price) { 
         document.getElementById('vacinaId').value = id;
         document.getElementById('name').value = name;
         document.getElementById('fabricante').value = manufacturer || '';
         document.getElementById('estoque').value = stock;
+        document.getElementById('preco').value = price;
         document.getElementById('listagemEstoque').style.display = 'none';
         document.getElementById('formularioEstoque').style.display = 'block';
     }

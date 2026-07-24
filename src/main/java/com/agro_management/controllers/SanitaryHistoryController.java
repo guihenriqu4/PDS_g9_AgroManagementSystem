@@ -30,27 +30,67 @@ public class SanitaryHistoryController {
 
     // Rota POST: Registrar nova aplicação de vacina
     @PostMapping
-    public ResponseEntity<Void> registerApplication(@RequestBody VaccineApplicationRequestDTO data) {
+    public ResponseEntity<String> registerApplication(@RequestBody VaccineApplicationRequestDTO data) {
         Optional<Animal> animal = animalRepository.findById(data.animalId());
         Optional<Vaccine> vaccine = vaccineRepository.findById(data.vaccineId());
         Optional<User> user = userRepository.findById(data.userId());
 
         // Valida se as três chaves estrangeiras realmente existem no banco
         if (animal.isEmpty() || vaccine.isEmpty() || user.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Dados inválidos: Animal, Vacina ou Usuário não encontrados.");
         }
 
+        Vaccine vac = vaccine.get();
+        
+        // 1. Validação de Estoque (US 2)
+        if (vac.getStockQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("Estoque insuficiente para a vacina selecionada.");
+        }
+
+        // 2. Baixa no Estoque (US 2)
+        vac.setStockQuantity(vac.getStockQuantity() - 1);
+        vaccineRepository.save(vac); // Salva a vacina com o novo saldo
+
+        // 3. Registro do Histórico
         VaccineApplication app = new VaccineApplication();
         app.setAnimal(animal.get());
-        app.setVaccine(vaccine.get());
+        app.setVaccine(vac);
         app.setUser(user.get());
         app.setApplicationDate(data.applicationDate());
         app.setNextDoseDate(data.nextDoseDate());
-        app.setObservation(data.observation());
+        
+        // 4. Automação do Status (US 4 - Ignora o que vem do front e calcula no back)
+        String statusCalculado = "Em Dia";
+        if (data.nextDoseDate() != null) {
+            // A data atual (hoje)
+            java.time.LocalDate hoje = java.time.LocalDate.now();
+            
+            if (data.nextDoseDate().isBefore(hoje)) {
+                statusCalculado = "Atrasada"; // Se a próxima dose já passou de hoje
+            } else if (data.nextDoseDate().isBefore(hoje.plusDays(15))) {
+                statusCalculado = "Pendente"; // Se a próxima dose é nos próximos 15 dias
+            }
+        }
+        app.setObservation(statusCalculado);
+        
         app.setCreatedAt(LocalDateTime.now());
-
         applicationRepository.save(app);
+        
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<VaccineApplicationResponseDTO>> getUpcomingDoses() {
+        // Define o limite como os próximos 30 dias a partir de hoje
+        java.time.LocalDate thirtyDaysFromNow = java.time.LocalDate.now().plusDays(30);
+        
+        List<VaccineApplication> upcoming = applicationRepository.findUpcomingDoses(thirtyDaysFromNow);
+        
+        List<VaccineApplicationResponseDTO> response = upcoming.stream()
+                .map(VaccineApplicationResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
